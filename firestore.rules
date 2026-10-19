@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Radio broadcast state (Live show, active RJ, now playing track)
+    match /radio_state/{docId} {
+      allow read: if true;
+      allow write: if true; // Or restrict to admin: request.auth != null
+    }
+
+    // 2. Live campus chat messages during broadcasts
+    match /chat_messages/{messageId} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+
+    // 3. Song requests & dedications
+    match /song_requests/{requestId} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+
+    // 4. Live campus opinion polls & votes
+    match /polls/{pollId} {
+      allow read, create, update: if true;
+    }
+
+    // 5. Confessions of the campus (Pre-moderated wall)
+    match /confessions/{confessionId} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+
+    // 6. Campus Wire (Events, fests, club notices)
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // 7. Lost and found board
+    match /lost_and_found/{itemId} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+
+    // 8. Student RJ auditions & host applications
+    match /auditions/{auditionId} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+
+    // 9. Original music submissions from student artists
+    match /music_submissions/{submissionId} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+  }
+}

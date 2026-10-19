@@ -1,0 +1,726 @@
+import React, { useState } from 'react'
+import confetti from 'canvas-confetti'
+import { seedCampusDataToFirestore } from '../firebase/db'
+
+export function AdminScreen({
+  radioState,
+  onUpdateRadioState,
+  shows,
+  onUpdateShows,
+  songRequests,
+  onUpdateSongRequests,
+  confessions,
+  onUpdateConfessions,
+  events,
+  onAddEvent,
+  lostAndFound,
+  onUpdateLostAndFound,
+  auditions,
+  onUpdateAuditions,
+  musicSubmissions,
+  onExitAdmin,
+}) {
+  const [activeAdminTab, setActiveAdminTab] = useState('studio') // 'studio' | 'moderation' | 'wire' | 'auditions' | 'music'
+  const [isSeeding, setIsSeeding] = useState(false)
+  const [seedStatus, setSeedStatus] = useState('')
+
+  // Studio form state
+  const [showTitle, setShowTitle] = useState(radioState?.currentShow?.title || '')
+  const [showRj, setShowRj] = useState(radioState?.currentShow?.rj || '')
+  const [trackTitle, setTrackTitle] = useState(radioState?.currentShow?.nowPlaying?.title || '')
+  const [trackArtist, setTrackArtist] = useState(radioState?.currentShow?.nowPlaying?.artist || '')
+  const [listeners, setListeners] = useState(radioState?.listenersCount || 428)
+  const [isLive, setIsLive] = useState(radioState?.isLive ?? true)
+
+  // Emergency alert state
+  const [alertActive, setAlertActive] = useState(radioState?.emergencyAlert?.active ?? true)
+  const [alertTitle, setAlertTitle] = useState(radioState?.emergencyAlert?.title || '')
+  const [alertDetails, setAlertDetails] = useState(radioState?.emergencyAlert?.details || '')
+
+  // New Event form
+  const [evTitle, setEvTitle] = useState('')
+  const [evClub, setEvClub] = useState('')
+  const [evDate, setEvDate] = useState('')
+  const [evVenue, setEvVenue] = useState('')
+  const [evDesc, setEvDesc] = useState('')
+
+  // Seeding trigger
+  const handleSeedDatabase = async () => {
+    setIsSeeding(true)
+    setSeedStatus('Seeding sample data to Cloud Firestore...')
+    const res = await seedCampusDataToFirestore()
+    setIsSeeding(false)
+    if (res.success) {
+      setSeedStatus('Successfully seeded Cloud Firestore (mescefm)!')
+      confetti({ particleCount: 40, spread: 70 })
+      setTimeout(() => setSeedStatus(''), 4000)
+    } else {
+      setSeedStatus(`Note: ${res.error}`)
+    }
+  }
+
+  // Handle saving studio live broadcast state
+  const handleSaveStudio = (e) => {
+    e.preventDefault()
+    onUpdateRadioState({
+      ...radioState,
+      isLive,
+      listenersCount: parseInt(listeners) || 428,
+      emergencyAlert: {
+        ...radioState.emergencyAlert,
+        active: alertActive,
+        title: alertTitle,
+        details: alertDetails,
+        timestamp: 'Just updated by Admin',
+      },
+      currentShow: {
+        ...radioState.currentShow,
+        title: showTitle,
+        rj: showRj,
+        nowPlaying: {
+          ...radioState.currentShow?.nowPlaying,
+          title: trackTitle,
+          artist: trackArtist,
+        },
+      },
+    })
+    confetti({ particleCount: 30, spread: 50 })
+    alert('Studio Broadcast updated live on air and synced to Firestore!')
+  }
+
+  // Song request status change
+  const handleUpdateRequestStatus = (id, newStatus) => {
+    onUpdateSongRequests(
+      songRequests.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
+    )
+  }
+
+  // Delete song request
+  const handleDeleteRequest = (id) => {
+    onUpdateSongRequests(songRequests.filter((r) => r.id !== id))
+  }
+
+  // Confession approval/rejection
+  const handleApproveConfession = (id) => {
+    onUpdateConfessions(
+      confessions.map((c) => (c.id === id ? { ...c, status: 'Approved', time: 'Approved Just Now' } : c))
+    )
+    confetti({ particleCount: 20, spread: 40 })
+  }
+
+  const handleRejectConfession = (id) => {
+    onUpdateConfessions(confessions.filter((c) => c.id !== id))
+  }
+
+  // Lost & Found claim toggle
+  const handleToggleClaimed = (id) => {
+    onUpdateLostAndFound(
+      lostAndFound.map((l) => (l.id === id ? { ...l, claimed: !l.claimed } : l))
+    )
+  }
+
+  // Audition status update
+  const handleAuditionStatus = (id, status) => {
+    onUpdateAuditions(
+      auditions.map((a) => (a.id === id ? { ...a, status } : a))
+    )
+  }
+
+  // Add event handler
+  const handleCreateEvent = (e) => {
+    e.preventDefault()
+    if (!evTitle.trim()) return
+
+    onAddEvent({
+      id: `ev-${Date.now()}`,
+      title: evTitle.trim(),
+      club: evClub.trim() || 'College Society',
+      date: evDate.trim() || 'Upcoming',
+      venue: evVenue.trim() || 'College Campus',
+      desc: evDesc.trim() || 'Official college event announcement.',
+      badge: 'CLUB EVENT',
+      badgeColor: 'bg-[#3814d4] text-white',
+    })
+
+    confetti({ particleCount: 25, spread: 50 })
+    setEvTitle('')
+    setEvClub('')
+    setEvDate('')
+    setEvVenue('')
+    setEvDesc('')
+    alert('New campus event published successfully!')
+  }
+
+  const adminTabs = [
+    { id: 'studio', label: 'Studio Control', icon: 'settings_input_antenna' },
+    { id: 'moderation', label: 'Moderation Queue', icon: 'gavel' },
+    { id: 'wire', label: 'Wire Publisher', icon: 'campaign' },
+    { id: 'auditions', label: 'RJ Auditions', icon: 'mic' },
+  ]
+
+  const pendingRequestsCount = songRequests.filter((r) => r.status === 'Pending').length
+  const pendingConfessionsCount = confessions.filter((c) => c.status === 'Pending').length
+
+  return (
+    <div className="flex flex-col w-full pb-8">
+      {/* Admin Top Master Header */}
+      <div className="px-4 pt-2">
+        <div className="bg-[#1c163b] text-white p-4.5 rounded-3xl shadow-xl border border-[#3814d4]/40 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#00d26a] animate-ping"></span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#ffdea8]">
+                MESCE FM 108.1 • STANDALONE STUDIO CONSOLE
+              </span>
+            </div>
+
+            <button
+              onClick={onExitAdmin}
+              className="text-[11px] bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-full font-bold text-white flex items-center gap-1 cursor-pointer transition-colors"
+            >
+              <span className="material-symbols-outlined text-[14px]">logout</span>
+              <span>Exit Studio</span>
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-[20px] font-black text-white leading-tight">
+                Radio Studio Command
+              </h2>
+              <p className="text-[11px] text-[#c5c0ff]">
+                Connected to Firebase Firestore (`mescefm`)
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold text-white">
+                {isLive ? 'ON AIR' : 'OFFLINE'}
+              </span>
+              <button
+                onClick={() => setIsLive(!isLive)}
+                className={`w-12 h-6.5 rounded-full transition-colors relative cursor-pointer ${
+                  isLive ? 'bg-[#e40468]' : 'bg-[#777587]'
+                }`}
+              >
+                <span
+                  className={`absolute top-1 w-4.5 h-4.5 rounded-full bg-white shadow transition-transform ${
+                    isLive ? 'right-1' : 'left-1'
+                  }`}
+                ></span>
+              </button>
+            </div>
+          </div>
+
+          {/* Database Seeder Button */}
+          <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+            <button
+              onClick={handleSeedDatabase}
+              disabled={isSeeding}
+              className="px-3 py-1.5 bg-[#e40468] hover:bg-[#b70051] text-white text-[11px] font-black rounded-xl shadow-md flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-[15px]">database</span>
+              <span>{isSeeding ? 'Seeding Database...' : 'Seed / Sync Cloud Firestore'}</span>
+            </button>
+
+            {seedStatus && (
+              <span className="text-[10px] text-[#ffdea8] font-bold animate-pulse">
+                {seedStatus}
+              </span>
+            )}
+          </div>
+
+          {/* Metric Badges */}
+          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/10 text-center">
+            <div className="bg-white/5 p-2 rounded-xl">
+              <span className="text-[16px] font-black text-white font-mono">{listeners}</span>
+              <span className="text-[9px] text-[#c5c0ff] block uppercase">Live Listeners</span>
+            </div>
+            <div className="bg-white/5 p-2 rounded-xl">
+              <span className="text-[16px] font-black text-[#ffdea8] font-mono">
+                {pendingRequestsCount}
+              </span>
+              <span className="text-[9px] text-[#c5c0ff] block uppercase">Song Requests</span>
+            </div>
+            <div className="bg-white/5 p-2 rounded-xl">
+              <span className="text-[16px] font-black text-[#ffb1c1] font-mono">
+                {pendingConfessionsCount}
+              </span>
+              <span className="text-[9px] text-[#c5c0ff] block uppercase">Pending Confess</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Admin Tab Selector */}
+      <div className="px-4 mt-3">
+        <div className="grid grid-cols-4 gap-1.5 bg-[#f1ebff] p-1 rounded-2xl">
+          {adminTabs.map((tab) => {
+            const isActive = activeAdminTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveAdminTab(tab.id)}
+                className={`py-2 px-1 rounded-xl text-[10px] font-extrabold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                  isActive
+                    ? 'bg-[#3814d4] text-white shadow-md'
+                    : 'text-[#474556] hover:text-[#3814d4]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[17px]">{tab.icon}</span>
+                <span className="truncate max-w-[65px]">{tab.label}</span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* SECTION 1: Studio Live Controller */}
+      {activeAdminTab === 'studio' && (
+        <div className="px-4 mt-3 flex flex-col gap-3">
+          <form onSubmit={handleSaveStudio} className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+              <h3 className="text-[15px] font-black text-[#1c163b] flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[#3814d4] text-[20px]">
+                  broadcast_on_home
+                </span>
+                Live Broadcast Parameters
+              </h3>
+              <span className="text-[10px] font-bold text-[#e40468]">108.1 FM</span>
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-[#474556] block mb-1">Current Show Title</label>
+              <input
+                type="text"
+                value={showTitle}
+                onChange={(e) => setShowTitle(e.target.value)}
+                className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[13px] font-bold text-[#1c163b] outline-none focus:border-[#3814d4]"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-[#474556] block mb-1">RJ / Hosts on Air</label>
+              <input
+                type="text"
+                value={showRj}
+                onChange={(e) => setShowRj(e.target.value)}
+                className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[11px] font-bold text-[#474556] block mb-1">Currently Playing Track</label>
+                <input
+                  type="text"
+                  value={trackTitle}
+                  onChange={(e) => setTrackTitle(e.target.value)}
+                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] font-bold text-[#1c163b] outline-none focus:border-[#3814d4]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-[#474556] block mb-1">Artist / Band Name</label>
+                <input
+                  type="text"
+                  value={trackArtist}
+                  onChange={(e) => setTrackArtist(e.target.value)}
+                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-[#474556] block mb-1">Live Campus Listeners Count</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={listeners}
+                  onChange={(e) => setListeners(e.target.value)}
+                  className="w-32 bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[13px] font-mono font-bold text-[#1c163b] outline-none focus:border-[#3814d4]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setListeners((prev) => parseInt(prev) + 25)}
+                  className="px-2.5 py-1.5 bg-[#f1ebff] hover:bg-[#e6deff] text-[#3814d4] rounded-lg text-xs font-bold cursor-pointer"
+                >
+                  +25
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setListeners((prev) => Math.max(0, parseInt(prev) - 25))}
+                  className="px-2.5 py-1.5 bg-[#f1ebff] hover:bg-[#e6deff] text-[#3814d4] rounded-lg text-xs font-bold cursor-pointer"
+                >
+                  -25
+                </button>
+              </div>
+            </div>
+
+            {/* Emergency Banner Toggle */}
+            <div className="pt-2 border-t border-[#f1ebff] flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[12px] font-black text-[#1c163b]">Emergency Campus Notice</span>
+                  <p className="text-[10px] text-[#474556]">High priority broadcast alert banner</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAlertActive(!alertActive)}
+                  className={`w-12 h-6.5 rounded-full transition-colors relative cursor-pointer ${
+                    alertActive ? 'bg-[#e40468]' : 'bg-[#e6deff]'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 w-4.5 h-4.5 rounded-full bg-white shadow transition-transform ${
+                      alertActive ? 'right-1' : 'left-1'
+                    }`}
+                  ></span>
+                </button>
+              </div>
+
+              {alertActive && (
+                <div className="flex flex-col gap-2 bg-[#fff0f4] p-3 rounded-2xl border border-[#ffb1c1]">
+                  <input
+                    type="text"
+                    value={alertTitle}
+                    onChange={(e) => setAlertTitle(e.target.value)}
+                    placeholder="Alert Title (e.g. CAMPUS NOTICE: Auditions Today)"
+                    className="w-full bg-white border border-[#ffb1c1] rounded-xl px-3 py-1.5 text-[12px] font-bold text-[#3f0017]"
+                  />
+                  <textarea
+                    rows="2"
+                    value={alertDetails}
+                    onChange={(e) => setAlertDetails(e.target.value)}
+                    placeholder="Alert details text..."
+                    className="w-full bg-white border border-[#ffb1c1] rounded-xl p-2 text-[11px] text-[#3f0017]"
+                  ></textarea>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-[#3814d4] hover:bg-[#2400a0] text-white font-black text-[13px] rounded-2xl shadow-md transition-all cursor-pointer active:scale-98 mt-1"
+            >
+              Push Updates to Campus Broadcast & Firestore
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* SECTION 2: Community Moderation Queue */}
+      {activeAdminTab === 'moderation' && (
+        <div className="px-4 mt-3 flex flex-col gap-4">
+          {/* Song Requests Moderation */}
+          <div className="bg-white p-4 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+              <div>
+                <h3 className="text-[14px] font-black text-[#1c163b]">Song Requests Queue</h3>
+                <p className="text-[10px] text-[#474556]">Review and approve incoming dedications</p>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-[#ebe5ff] text-[#3814d4] text-[10px] font-bold">
+                {songRequests.length} Total
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {songRequests.map((req) => (
+                <div
+                  key={req.id}
+                  className="p-3 rounded-2xl bg-[#f7f1ff] border border-[#e6deff]/40 flex flex-col gap-1.5"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="text-[13px] font-black text-[#1c163b]">{req.songTitle}</h4>
+                      <p className="text-[11px] text-[#474556]">{req.artist}</p>
+                    </div>
+                    <span
+                      className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase ${
+                        req.status === 'Approved'
+                          ? 'bg-green-100 text-green-700'
+                          : req.status === 'Playing Soon'
+                          ? 'bg-[#ffd9df] text-[#e40468]'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}
+                    >
+                      {req.status}
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-[#3814d4] font-semibold">
+                    From: {req.requester} ➔ Dedicated to: {req.dedicationTo}
+                  </p>
+                  <p className="text-[11px] text-[#474556] italic">"{req.message}"</p>
+
+                  <div className="flex items-center justify-end gap-1.5 pt-1.5 border-t border-[#e6deff]/40">
+                    <button
+                      onClick={() => handleUpdateRequestStatus(req.id, 'Approved')}
+                      className="px-2.5 py-1 bg-[#3814d4] text-white rounded-lg text-[10px] font-bold hover:bg-[#2400a0] cursor-pointer"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleUpdateRequestStatus(req.id, 'Playing Soon')}
+                      className="px-2.5 py-1 bg-[#e40468] text-white rounded-lg text-[10px] font-bold hover:bg-[#b70051] cursor-pointer"
+                    >
+                      Playing Soon
+                    </button>
+                    <button
+                      onClick={() => handleDeleteRequest(req.id)}
+                      className="px-2 py-1 bg-red-100 text-red-700 rounded-lg text-[10px] font-bold cursor-pointer"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Confessions Moderation */}
+          <div className="bg-white p-4 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+              <div>
+                <h3 className="text-[14px] font-black text-[#1c163b]">Confessions Moderation Wall</h3>
+                <p className="text-[10px] text-[#474556]">Filter abusive or inappropriate submissions</p>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-[#ffd9df] text-[#e40468] text-[10px] font-bold">
+                {confessions.length} Posts
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              {confessions.map((conf) => (
+                <div
+                  key={conf.id}
+                  className="p-3.5 rounded-2xl bg-[#fdf8ff] border border-[#e6deff]/50 flex flex-col gap-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#f1ebff] text-[#3814d4]">
+                      {conf.tag}
+                    </span>
+                    <span
+                      className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase ${
+                        conf.status === 'Approved'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-amber-100 text-amber-800 animate-pulse'
+                      }`}
+                    >
+                      {conf.status || 'Approved'}
+                    </span>
+                  </div>
+
+                  <p className="text-[12px] text-[#1c163b] leading-relaxed">
+                    "{conf.content}"
+                  </p>
+
+                  <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-[#f1ebff]">
+                    {conf.status === 'Pending' && (
+                      <button
+                        onClick={() => handleApproveConfession(conf.id)}
+                        className="px-3 py-1 bg-green-600 text-white rounded-lg text-[10px] font-bold hover:bg-green-700 cursor-pointer"
+                      >
+                        Approve & Publish
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleRejectConfession(conf.id)}
+                      className="px-2.5 py-1 bg-red-100 text-red-700 rounded-lg text-[10px] font-bold hover:bg-red-200 cursor-pointer"
+                    >
+                      Reject / Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 3: Campus Wire Publisher */}
+      {activeAdminTab === 'wire' && (
+        <div className="px-4 mt-3 flex flex-col gap-4">
+          {/* Create Event Form */}
+          <form onSubmit={handleCreateEvent} className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+              <h3 className="text-[14px] font-black text-[#1c163b] flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[#3814d4] text-[20px]">
+                  add_circle
+                </span>
+                Publish New Fest or Club Event
+              </h3>
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-[#474556] block mb-1">Event Title *</label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Nakshatra 2026 / Hack-MES / Robo-Wars"
+                value={evTitle}
+                onChange={(e) => setEvTitle(e.target.value)}
+                className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] font-bold text-[#1c163b] outline-none focus:border-[#3814d4]"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[11px] font-bold text-[#474556] block mb-1">Organizing Club</label>
+                <input
+                  type="text"
+                  placeholder="e.g. IEEE / IEDC / Arts Club"
+                  value={evClub}
+                  onChange={(e) => setEvClub(e.target.value)}
+                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-[#474556] block mb-1">Dates</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Nov 12 – 14, 2026"
+                  value={evDate}
+                  onChange={(e) => setEvDate(e.target.value)}
+                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-[#474556] block mb-1">Venue on Campus</label>
+              <input
+                type="text"
+                placeholder="e.g. Main Auditorium / Civil Seminar Hall"
+                value={evVenue}
+                onChange={(e) => setEvVenue(e.target.value)}
+                className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-[#474556] block mb-1">Short Description</label>
+              <textarea
+                rows="2"
+                placeholder="Details, competitions, registration links..."
+                value={evDesc}
+                onChange={(e) => setEvDesc(e.target.value)}
+                className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl p-2.5 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+              ></textarea>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2.5 bg-[#3814d4] hover:bg-[#2400a0] text-white font-extrabold text-[12px] rounded-xl shadow-md cursor-pointer transition-all active:scale-98"
+            >
+              Broadcast on Campus Wire & Radio
+            </button>
+          </form>
+
+          {/* Manage Lost & Found items */}
+          <div className="bg-white p-4 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-2.5">
+            <h3 className="text-[14px] font-black text-[#1c163b]">Lost & Found Item Status</h3>
+            <div className="flex flex-col gap-2">
+              {lostAndFound.map((lf) => (
+                <div
+                  key={lf.id}
+                  className="p-2.5 rounded-xl bg-[#f7f1ff] flex items-center justify-between text-[12px]"
+                >
+                  <div className="min-w-0 pr-2">
+                    <span className="font-extrabold text-[#1c163b] block truncate">{lf.item}</span>
+                    <span className="text-[10px] text-[#474556] truncate">{lf.location}</span>
+                  </div>
+                  <button
+                    onClick={() => handleToggleClaimed(lf.id)}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold cursor-pointer transition-all ${
+                      lf.claimed
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-amber-100 text-amber-800'
+                    }`}
+                  >
+                    {lf.claimed ? 'Mark Unclaimed' : 'Mark Claimed'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 4: RJ Auditions & Guest Hosts */}
+      {activeAdminTab === 'auditions' && (
+        <div className="px-4 mt-3 flex flex-col gap-3">
+          <div className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+              <div>
+                <h3 className="text-[14px] font-black text-[#1c163b]">RJ Auditions & Applications</h3>
+                <p className="text-[10px] text-[#474556]">Students applying for radio shows and guest hosting</p>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-[#ffd9df] text-[#e40468] text-[10px] font-bold">
+                {auditions.length} Applications
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {auditions.map((aud) => (
+                <div
+                  key={aud.id}
+                  className="p-3.5 rounded-2xl bg-[#f7f1ff] border border-[#e6deff]/50 flex flex-col gap-2"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="text-[13px] font-black text-[#1c163b]">
+                        {aud.applicantName}
+                      </h4>
+                      <p className="text-[11px] text-[#3814d4] font-bold">{aud.dept}</p>
+                    </div>
+                    <span
+                      className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase ${
+                        aud.status.includes('Approved')
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}
+                    >
+                      {aud.status}
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-[#1c163b] font-medium leading-snug">
+                    <span className="font-bold text-[#474556]">Show Pitch:</span> {aud.showConcept}
+                  </p>
+
+                  <div className="flex items-center justify-between text-[10px] text-[#777587]">
+                    <span>Preferred: {aud.preferredTime}</span>
+                    <span className="font-semibold text-[#3814d4]">🎵 {aud.sampleVoiceClip}</span>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-1.5 pt-1.5 border-t border-[#e6deff]/40">
+                    <button
+                      onClick={() => handleAuditionStatus(aud.id, 'Approved for Pilot')}
+                      className="px-2.5 py-1 bg-green-600 text-white rounded-lg text-[10px] font-bold hover:bg-green-700 cursor-pointer"
+                    >
+                      Approve for Pilot
+                    </button>
+                    <button
+                      onClick={() => handleAuditionStatus(aud.id, 'Interview Scheduled')}
+                      className="px-2.5 py-1 bg-[#3814d4] text-white rounded-lg text-[10px] font-bold hover:bg-[#2400a0] cursor-pointer"
+                    >
+                      Schedule Audition
+                    </button>
+                    <button
+                      onClick={() => handleAuditionStatus(aud.id, 'Declined')}
+                      className="px-2 py-1 bg-red-100 text-red-700 rounded-lg text-[10px] font-bold cursor-pointer"
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
