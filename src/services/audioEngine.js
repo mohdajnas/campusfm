@@ -1,5 +1,6 @@
-// Audio Engine: Real Music Stream & On-Air Dynamic Queue Player for MESCE FM 108.1
+// Audio Engine: Full-Length Song Stream & Dynamic Queue Player for MESCE FM 108.1
 import { DEFAULT_MALAYALAM_PLAYLIST } from './musicService'
+import { youtubeAudio } from './youtubeAudio'
 
 class AudioEngine {
   constructor() {
@@ -7,7 +8,6 @@ class AudioEngine {
     this.audio.preload = 'auto'
     this.audio.crossOrigin = 'anonymous'
 
-    this.audioCtx = null
     this.isPlaying = false
     this.volume = 0.8
     this.audio.volume = this.volume
@@ -20,66 +20,69 @@ class AudioEngine {
     this.playlistIndex = 0
 
     this.currentTime = 0
-    this.duration = 30
+    this.duration = DEFAULT_MALAYALAM_PLAYLIST[0]?.duration || 193
     this.listeners = new Set()
+    this.activeEngine = 'youtube' // 'youtube' | 'html5'
 
-    // Setup HTML5 Audio Event Listeners
-    this.audio.addEventListener('playing', () => {
-      this.isPlaying = true
+    // Connect YouTube Audio events
+    youtubeAudio.onStateChangeCallback = (isPlaying) => {
+      this.isPlaying = isPlaying
       this.notify()
+    }
+
+    youtubeAudio.onTimeUpdateCallback = (currTime, totalDuration) => {
+      this.currentTime = currTime
+      if (totalDuration > 0) {
+        this.duration = totalDuration
+      }
+      this.notify()
+    }
+
+    youtubeAudio.onEndedCallback = () => {
+      console.log('MESCE FM: Full song finished. Auto-advancing to next queued track...')
+      this.advanceNext()
+    }
+
+    // HTML5 Audio Fallback listeners
+    this.audio.addEventListener('playing', () => {
+      if (this.activeEngine === 'html5') {
+        this.isPlaying = true
+        this.notify()
+      }
     })
 
     this.audio.addEventListener('pause', () => {
-      this.isPlaying = false
-      this.notify()
+      if (this.activeEngine === 'html5') {
+        this.isPlaying = false
+        this.notify()
+      }
     })
 
     this.audio.addEventListener('timeupdate', () => {
-      this.currentTime = this.audio.currentTime
-      if (this.audio.duration && !isNaN(this.audio.duration)) {
-        this.duration = this.audio.duration
-      }
-      this.notify()
-    })
-
-    this.audio.addEventListener('loadedmetadata', () => {
-      if (this.audio.duration && !isNaN(this.audio.duration)) {
-        this.duration = this.audio.duration
-      }
-      this.notify()
-    })
-
-    // AUTO-ADVANCE: When track ends, play the next track in queue (e.g. requested song)
-    this.audio.addEventListener('ended', () => {
-      console.log('MESCE FM: Track completed. Auto-advancing to next queued track...')
-      this.advanceNext()
-    })
-
-    this.audio.addEventListener('error', (err) => {
-      console.warn('Audio stream error or network block, skipping to next track:', err)
-      setTimeout(() => {
-        if (this.isPlaying) {
-          this.advanceNext()
+      if (this.activeEngine === 'html5') {
+        this.currentTime = this.audio.currentTime
+        if (this.audio.duration && !isNaN(this.audio.duration)) {
+          this.duration = this.audio.duration
         }
-      }, 1000)
-    })
-  }
-
-  initContext() {
-    if (!this.audioCtx) {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext
-      if (AudioContextClass) {
-        this.audioCtx = new AudioContextClass()
+        this.notify()
       }
-    }
-    if (this.audioCtx && this.audioCtx.state === 'suspended') {
-      this.audioCtx.resume()
-    }
+    })
+
+    this.audio.addEventListener('ended', () => {
+      if (this.activeEngine === 'html5') {
+        this.advanceNext()
+      }
+    })
+
+    this.audio.addEventListener('error', () => {
+      if (this.activeEngine === 'html5') {
+        this.advanceNext()
+      }
+    })
   }
 
   subscribe(listener) {
     this.listeners.add(listener)
-    // Send immediate initial state
     try {
       listener(this.getState())
     } catch (e) {
@@ -107,32 +110,36 @@ class AudioEngine {
       queue: [...this.queue],
       history: [...this.history],
       currentTime: this.currentTime,
-      duration: this.duration || 30,
+      duration: this.duration || 193,
     }
   }
 
   setVolume(vol) {
     this.volume = Math.max(0, Math.min(1, vol))
     this.audio.volume = this.volume
+    youtubeAudio.setVolume(this.volume)
     this.notify()
   }
 
   seek(seconds) {
-    if (!isNaN(seconds) && this.audio) {
-      this.audio.currentTime = Math.max(0, Math.min(seconds, this.duration || 1000))
-      this.currentTime = this.audio.currentTime
-      this.notify()
+    if (isNaN(seconds)) return
+
+    this.currentTime = seconds
+    if (this.activeEngine === 'youtube') {
+      youtubeAudio.seekTo(seconds)
+    } else if (this.audio) {
+      this.audio.currentTime = seconds
     }
+    this.notify()
   }
 
   /**
-   * Starts playing a specific track immediately
+   * Starts playing a specific track in full length
    */
   playTrack(track) {
-    this.initContext()
-    if (!track || !track.streamUrl) return
+    if (!track) return
 
-    // If there is an active current track, save to history
+    // Save previous to history
     if (this.currentTrack && this.currentTrack.id !== track.id) {
       this.history.unshift(this.currentTrack)
       if (this.history.length > 20) this.history.pop()
@@ -140,55 +147,62 @@ class AudioEngine {
 
     this.currentTrack = track
     this.currentTime = 0
-    this.duration = track.duration || 30
-    this.audio.src = track.streamUrl
+    this.duration = track.duration || 210
 
-    const playPromise = this.audio.play()
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          this.isPlaying = true
-          this.notify()
-        })
-        .catch((e) => {
-          console.warn('Audio auto-play blocked by browser policy:', e)
-          this.isPlaying = false
-          this.notify()
-        })
+    // Full-length YouTube audio playback (default)
+    if (track.youtubeId || track.searchQuery || !track.streamUrl) {
+      this.activeEngine = 'youtube'
+      this.audio.pause()
+      youtubeAudio.playTrack(track)
+    } else {
+      // Direct stream URL fallback
+      this.activeEngine = 'html5'
+      youtubeAudio.pause()
+      this.audio.src = track.streamUrl
+      this.audio.play().catch(() => {
+        // Fallback to YouTube if browser blocks direct stream
+        this.activeEngine = 'youtube'
+        youtubeAudio.playTrack(track)
+      })
     }
+
+    this.isPlaying = true
+    this.notify()
   }
 
-  /**
-   * Toggles playback between play and pause.
-   */
   togglePlay(overrideTrack) {
-    this.initContext()
     if (this.isPlaying) {
       this.pause()
     } else {
       if (overrideTrack) {
         this.playTrack(overrideTrack)
-      } else if (this.audio.src) {
-        this.audio.play().catch(() => {
-          if (this.currentTrack) this.playTrack(this.currentTrack)
-        })
+      } else if (this.currentTrack) {
+        if (this.activeEngine === 'youtube') {
+          youtubeAudio.togglePlay()
+          this.isPlaying = true
+          this.notify()
+        } else {
+          this.audio.play().catch(() => {
+            this.playTrack(this.currentTrack)
+          })
+        }
       } else {
-        const trackToPlay = this.currentTrack || this.defaultPlaylist[0]
-        this.playTrack(trackToPlay)
+        this.playTrack(this.defaultPlaylist[0])
       }
     }
   }
 
   pause() {
-    this.audio.pause()
     this.isPlaying = false
+    youtubeAudio.pause()
+    this.audio.pause()
     this.notify()
   }
 
   /**
    * Adds a track to the playback queue.
    * If playNext is true (standard for song requests / dedications),
-   * inserts it at position 0 so it plays right after the current song!
+   * inserts it at index 0 so it plays right after the current song!
    */
   addToQueue(track, playNext = true) {
     if (!track) return
@@ -199,8 +213,8 @@ class AudioEngine {
       this.queue.push(track)
     }
 
-    // If nothing is currently playing, start playing it immediately
-    if (!this.isPlaying && (!this.audio.src || this.audio.paused)) {
+    // If station is currently stopped, start playing it immediately
+    if (!this.isPlaying && !this.currentTrack) {
       const next = this.queue.shift()
       this.playTrack(next)
       return
@@ -209,9 +223,6 @@ class AudioEngine {
     this.notify()
   }
 
-  /**
-   * Removes a track from the queue at a given index
-   */
   removeFromQueue(index) {
     if (index >= 0 && index < this.queue.length) {
       this.queue.splice(index, 1)
@@ -220,27 +231,23 @@ class AudioEngine {
   }
 
   /**
-   * Advances to the next track:
-   * 1. If queue has items (e.g. requested songs), plays the first one.
-   * 2. If queue is empty, plays the next song from the default campus rotation.
+   * Advances to next track:
+   * 1. If queue has items (requested songs), plays the first one.
+   * 2. If queue is empty, plays the next full song from campus rotation.
    */
   advanceNext() {
     if (this.queue.length > 0) {
       const nextSong = this.queue.shift()
       this.playTrack(nextSong)
     } else {
-      // Loop through campus default playlist
       this.playlistIndex = (this.playlistIndex + 1) % this.defaultPlaylist.length
-      const nextDefaultSong = this.defaultPlaylist[this.playlistIndex]
-      this.playTrack(nextDefaultSong)
+      const nextDefault = this.defaultPlaylist[this.playlistIndex]
+      this.playTrack(nextDefault)
     }
   }
 
-  /**
-   * Skips to the previous track or replays current
-   */
   skipPrev() {
-    if (this.currentTime > 3) {
+    if (this.currentTime > 5) {
       this.seek(0)
     } else if (this.history.length > 0) {
       const prevTrack = this.history.shift()
@@ -252,9 +259,6 @@ class AudioEngine {
     }
   }
 
-  /**
-   * Skip forward to next track (Queue or next rotation)
-   */
   skipNext() {
     this.advanceNext()
   }
