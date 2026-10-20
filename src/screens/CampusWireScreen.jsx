@@ -33,35 +33,131 @@ export function CampusWireScreen({
     setLfContact('')
   }
 
-  const tabs = [
-    { id: 'all', label: 'All Wire' },
-    { id: 'events', label: 'Fest & Clubs' },
-    { id: 'lost', label: `Lost & Found (${lostAndFound.filter((l) => !l.claimed).length})` },
-    { id: 'opportunities', label: 'Internships & Contests' },
+  const unclaimedLostCount = lostAndFound.filter((l) => !l.claimed).length
+  const totalCount = events.length + unclaimedLostCount + opportunities.length
+
+  const categories = [
+    {
+      id: 'all',
+      title: 'All Wire',
+      subtitle: `${totalCount} updates`,
+      icon: 'layers',
+      bgClass: 'bg-gradient-to-br from-[#9b67db] to-[#8652cb]',
+      hoverClass: 'hover:brightness-105',
+      glowColor: 'rgba(150, 98, 213, 0.4)',
+      count: totalCount,
+    },
+    {
+      id: 'events',
+      title: 'Fest & Clubs',
+      subtitle: `${events.length} events`,
+      icon: 'add_comment',
+      bgClass: 'bg-gradient-to-br from-[#53df6d] to-[#3ece58]',
+      hoverClass: 'hover:brightness-105',
+      glowColor: 'rgba(79, 219, 106, 0.4)',
+      count: events.length,
+    },
+    {
+      id: 'lost',
+      title: 'Lost & Found',
+      subtitle: `${unclaimedLostCount} unclaimed`,
+      icon: 'location_on',
+      bgClass: 'bg-gradient-to-br from-[#9ebaa2] to-[#86a58d]',
+      hoverClass: 'hover:brightness-105',
+      glowColor: 'rgba(157, 185, 163, 0.4)',
+      count: unclaimedLostCount,
+    },
+    {
+      id: 'opportunities',
+      title: 'Internships & Contests',
+      subtitle: `${opportunities.length} openings`,
+      icon: 'timer',
+      bgClass: 'bg-gradient-to-br from-[#ff9575] to-[#f97350]',
+      hoverClass: 'hover:brightness-105',
+      glowColor: 'rgba(255, 147, 115, 0.4)',
+      count: opportunities.length,
+    },
   ]
+
+  const handleCategorySelect = (id) => {
+    if (filterTab === id && id !== 'all') {
+      setFilterTab('all')
+    } else {
+      setFilterTab(id)
+    }
+  }
 
   return (
     <div className="flex flex-col w-full pb-8">
-      {/* Top Banner Filter */}
-      <div className="px-4 pt-2 pb-2">
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-          {tabs.map((tab) => {
-            const isActive = filterTab === tab.id
+      {/* 2x2 Category Box Grid (iOS Shortcuts Style) */}
+      <div className="px-4 pt-3 pb-2">
+        <div className="grid grid-cols-2 gap-3">
+          {categories.map((box) => {
+            const isActive = filterTab === box.id
             return (
               <button
-                key={tab.id}
-                onClick={() => setFilterTab(tab.id)}
-                className={`shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-extrabold whitespace-nowrap transition-all cursor-pointer ${
+                key={box.id}
+                onClick={() => handleCategorySelect(box.id)}
+                className={`relative flex flex-col justify-between p-3.5 sm:p-4 rounded-[22px] text-left transition-all duration-200 cursor-pointer select-none overflow-hidden min-h-[104px] ${
+                  box.bgClass
+                } ${box.hoverClass} ${
                   isActive
-                    ? 'bg-[#3814d4] text-white shadow-md'
-                    : 'bg-[#f1ebff] text-[#474556] hover:bg-[#e6deff]'
+                    ? 'ring-[3.5px] ring-white shadow-xl scale-[1.02]'
+                    : filterTab !== 'all'
+                    ? 'opacity-80 hover:opacity-100 hover:scale-[1.01] shadow-md'
+                    : 'hover:scale-[1.01] shadow-md'
                 }`}
+                style={{
+                  boxShadow: isActive
+                    ? `0 12px 24px -4px ${box.glowColor}, 0 6px 12px -2px rgba(0, 0, 0, 0.12)`
+                    : '0 4px 14px 0 rgba(0, 0, 0, 0.08)',
+                }}
               >
-                {tab.label}
+                {/* Top: Icon & Indicator */}
+                <div className="flex items-start justify-between w-full">
+                  <span className="material-symbols-outlined text-white text-[28px] drop-shadow-sm select-none">
+                    {box.icon}
+                  </span>
+                  {isActive ? (
+                    <div className="w-5 h-5 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center text-white shadow-xs">
+                      <span className="material-symbols-outlined text-[13px] font-black">check</span>
+                    </div>
+                  ) : box.count > 0 ? (
+                    <span className="px-2 py-0.5 rounded-full bg-black/15 text-white/95 text-[10px] font-bold backdrop-blur-xs">
+                      {box.count}
+                    </span>
+                  ) : null}
+                </div>
+
+                {/* Bottom: Title & Subtitle */}
+                <div className="mt-3">
+                  <h4 className="text-white text-[15px] sm:text-[16px] font-bold leading-tight drop-shadow-sm">
+                    {box.title}
+                  </h4>
+                  <p className="text-white/80 text-[11px] font-medium leading-tight mt-0.5 truncate">
+                    {box.subtitle}
+                  </p>
+                </div>
               </button>
             )
           })}
         </div>
+
+        {/* Filter Reset pill when filtered */}
+        {filterTab !== 'all' && (
+          <div className="flex items-center justify-between mt-2.5 px-1 text-[11px]">
+            <span className="text-[#474556] font-semibold">
+              Showing <span className="font-extrabold text-[#1c163b]">{categories.find((c) => c.id === filterTab)?.title}</span>
+            </span>
+            <button
+              onClick={() => setFilterTab('all')}
+              className="text-[#3814d4] font-extrabold hover:underline cursor-pointer flex items-center gap-0.5"
+            >
+              <span>Reset filter</span>
+              <span className="material-symbols-outlined text-[14px]">close</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Emergency Official Alert (if active) */}
