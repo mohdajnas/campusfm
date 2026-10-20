@@ -296,6 +296,26 @@ export async function addEventToDb(event) {
   }
 }
 
+export async function updateEventStatusInDb(id, status) {
+  try {
+    const docRef = doc(db, 'events', id)
+    await updateDoc(docRef, { status })
+  } catch (err) {
+    console.error('Failed to update event status:', err)
+    throw err
+  }
+}
+
+export async function deleteEventFromDb(id) {
+  try {
+    const docRef = doc(db, 'events', id)
+    await deleteDoc(docRef)
+  } catch (err) {
+    console.error('Failed to delete event:', err)
+    throw err
+  }
+}
+
 // 7. Lost & Found
 export function subscribeLostAndFound(callback) {
   try {

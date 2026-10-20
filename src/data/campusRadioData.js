@@ -301,6 +301,8 @@ export const CAMPUS_EVENTS = [
     badgeColor: 'bg-[#e40468] text-white',
     desc: '3 days of robotics competitions, pro-shows, hackathons, dance battles, and auto expo.',
     contact: 'union@mesce.ac.in',
+    status: 'approved',
+    submittedBy: 'Admin',
   },
   {
     id: 'ev-2',
@@ -312,6 +314,8 @@ export const CAMPUS_EVENTS = [
     badgeColor: 'bg-[#3814d4] text-white',
     desc: '₹50,000 cash prize pool. Track themes in AI for Agriculture, Smart Campus, and Clean Energy.',
     contact: 'ieee@mesce.ac.in',
+    status: 'approved',
+    submittedBy: 'Admin',
   },
   {
     id: 'ev-3',
@@ -323,6 +327,8 @@ export const CAMPUS_EVENTS = [
     badgeColor: 'bg-[#5d4100] text-[#ffdea8]',
     desc: 'Bring your instruments or just your voice. Open mic for all students and faculties.',
     contact: 'music_club@mesce.ac.in',
+    status: 'approved',
+    submittedBy: 'Admin',
   },
 ]
 

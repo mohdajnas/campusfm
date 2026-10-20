@@ -12,8 +12,10 @@ export function AdminScreen({
   onUpdateSongRequests,
   confessions,
   onUpdateConfessions,
-  events,
+  events = [],
   onAddEvent,
+  onApproveEvent,
+  onRejectEvent,
   lostAndFound,
   onUpdateLostAndFound,
   auditions,
@@ -204,6 +206,8 @@ export function AdminScreen({
       desc: evDesc.trim() || 'Official college event announcement.',
       badge: 'CLUB EVENT',
       badgeColor: 'bg-[#3814d4] text-white',
+      status: 'approved',
+      submittedBy: 'Studio Admin',
     })
 
     confetti({ particleCount: 25, spread: 50 })
@@ -215,15 +219,32 @@ export function AdminScreen({
     alert('New campus event published successfully!')
   }
 
-  const adminTabs = [
-    { id: 'studio', label: 'Studio Control', icon: 'settings_input_antenna' },
-    { id: 'moderation', label: 'Moderation Queue', icon: 'gavel' },
-    { id: 'wire', label: 'Wire Publisher', icon: 'campaign' },
-    { id: 'auditions', label: 'RJ Auditions', icon: 'mic' },
-  ]
+  // Event approval/rejection handlers
+  const handleApprove = (id) => {
+    if (onApproveEvent) {
+      onApproveEvent(id)
+      confetti({ particleCount: 30, spread: 60 })
+    }
+  }
+
+  const handleReject = (id) => {
+    if (onRejectEvent) {
+      onRejectEvent(id)
+    }
+  }
+
+  const pendingEvents = (events || []).filter((e) => e.status === 'pending')
+  const approvedEvents = (events || []).filter((e) => e.status !== 'pending')
 
   const pendingRequestsCount = songRequests.filter((r) => r.status === 'Pending').length
   const pendingConfessionsCount = confessions.filter((c) => c.status === 'Pending').length
+
+  const adminTabs = [
+    { id: 'studio', label: 'Studio Control', icon: 'settings_input_antenna' },
+    { id: 'moderation', label: 'Moderation Queue', icon: 'gavel', badge: (pendingRequestsCount + pendingConfessionsCount) || null },
+    { id: 'wire', label: 'Wire & Events', icon: 'campaign', badge: pendingEvents.length || null },
+    { id: 'auditions', label: 'RJ Auditions', icon: 'mic' },
+  ]
 
   return (
     <div className="flex flex-col w-full pb-8">
@@ -295,22 +316,28 @@ export function AdminScreen({
           </div>
 
           {/* Metric Badges */}
-          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/10 text-center">
+          <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-white/10 text-center">
             <div className="bg-white/5 p-2 rounded-xl">
-              <span className="text-[16px] font-black text-white font-mono">{listeners}</span>
-              <span className="text-[9px] text-[#c5c0ff] block uppercase">Live Listeners</span>
+              <span className="text-[15px] font-black text-white font-mono">{listeners}</span>
+              <span className="text-[8.5px] text-[#c5c0ff] block uppercase">Live</span>
             </div>
             <div className="bg-white/5 p-2 rounded-xl">
-              <span className="text-[16px] font-black text-[#ffdea8] font-mono">
+              <span className="text-[15px] font-black text-[#ffdea8] font-mono">
                 {pendingRequestsCount}
               </span>
-              <span className="text-[9px] text-[#c5c0ff] block uppercase">Song Requests</span>
+              <span className="text-[8.5px] text-[#c5c0ff] block uppercase">Requests</span>
             </div>
             <div className="bg-white/5 p-2 rounded-xl">
-              <span className="text-[16px] font-black text-[#ffb1c1] font-mono">
+              <span className="text-[15px] font-black text-[#ffb1c1] font-mono">
                 {pendingConfessionsCount}
               </span>
-              <span className="text-[9px] text-[#c5c0ff] block uppercase">Pending Confess</span>
+              <span className="text-[8.5px] text-[#c5c0ff] block uppercase">Confess</span>
+            </div>
+            <div className="bg-white/5 p-2 rounded-xl">
+              <span className="text-[15px] font-black text-amber-300 font-mono">
+                {pendingEvents.length}
+              </span>
+              <span className="text-[8.5px] text-[#c5c0ff] block uppercase">Events</span>
             </div>
           </div>
         </div>
@@ -325,13 +352,20 @@ export function AdminScreen({
               <button
                 key={tab.id}
                 onClick={() => setActiveAdminTab(tab.id)}
-                className={`py-2 px-1 rounded-xl text-[10px] font-extrabold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                className={`py-2 px-1 rounded-xl text-[10px] font-extrabold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer relative ${
                   isActive
                     ? 'bg-[#3814d4] text-white shadow-md'
                     : 'text-[#474556] hover:text-[#3814d4]'
                 }`}
               >
-                <span className="material-symbols-outlined text-[17px]">{tab.icon}</span>
+                <div className="relative flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[17px]">{tab.icon}</span>
+                  {tab.badge && (
+                    <span className="absolute -top-1.5 -right-2.5 bg-[#e40468] text-white text-[8px] font-black min-w-[14px] h-[14px] px-1 rounded-full flex items-center justify-center shadow">
+                      {tab.badge}
+                    </span>
+                  )}
+                </div>
                 <span className="truncate max-w-[65px]">{tab.label}</span>
               </button>
             )
@@ -746,6 +780,142 @@ export function AdminScreen({
       {/* SECTION 3: Campus Wire Publisher */}
       {activeAdminTab === 'wire' && (
         <div className="px-4 mt-3 flex flex-col gap-4">
+          {/* Student Submissions Moderation Queue */}
+          <div className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+              <div>
+                <h3 className="text-[14px] font-black text-[#1c163b] flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-amber-500 text-[20px]">
+                    pending_actions
+                  </span>
+                  Student Event Submissions
+                </h3>
+                <p className="text-[10px] text-[#474556]">
+                  Events submitted by students requiring review before broadcasting
+                </p>
+              </div>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                pendingEvents.length > 0 ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-500'
+              }`}>
+                {pendingEvents.length} Pending
+              </span>
+            </div>
+
+            {pendingEvents.length === 0 ? (
+              <div className="text-center py-5 px-4 bg-[#fbf9ff] rounded-2xl border border-dashed border-[#e6deff]">
+                <span className="material-symbols-outlined text-[30px] text-gray-400">
+                  task_alt
+                </span>
+                <p className="text-[12px] font-bold text-[#1c163b] mt-1">All events reviewed!</p>
+                <p className="text-[10px] text-[#777587]">
+                  New student event proposals from Campus Wire will appear here.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {pendingEvents.map((ev) => (
+                  <div
+                    key={ev.id}
+                    className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex flex-col gap-2.5 relative overflow-hidden"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-amber-500 text-white">
+                            AWAITING APPROVAL
+                          </span>
+                          <span className="text-[10px] text-amber-800 font-bold">
+                            By {ev.submittedBy || 'Student'}
+                          </span>
+                        </div>
+                        <h4 className="text-[14px] font-black text-[#1c163b] mt-1 leading-snug">
+                          {ev.title}
+                        </h4>
+                        <p className="text-[11px] text-[#3814d4] font-bold">{ev.club}</p>
+                      </div>
+                    </div>
+
+                    {ev.desc && (
+                      <p className="text-[11px] text-[#474556] leading-relaxed bg-white/70 p-2 rounded-xl border border-amber-100">
+                        {ev.desc}
+                      </p>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-2 text-[10px] font-bold text-[#474556]">
+                      <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[13px] text-amber-600">calendar_today</span>
+                        {ev.date}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[13px] text-amber-600">location_on</span>
+                        {ev.venue}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-amber-200/60">
+                      <button
+                        onClick={() => handleReject(ev.id)}
+                        className="px-3 py-1.5 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-[11px] font-bold rounded-xl cursor-pointer transition-colors flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">close</span>
+                        <span>Reject</span>
+                      </button>
+                      <button
+                        onClick={() => handleApprove(ev.id)}
+                        className="px-3.5 py-1.5 bg-green-600 hover:bg-green-700 text-white text-[11px] font-extrabold rounded-xl shadow-sm cursor-pointer transition-colors flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">check</span>
+                        <span>Approve & Broadcast</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Active Live Published Events */}
+          {approvedEvents.length > 0 && (
+            <div className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
+              <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+                <div>
+                  <h3 className="text-[14px] font-black text-[#1c163b] flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[#3814d4] text-[20px]">
+                      event_available
+                    </span>
+                    Live Published Events ({approvedEvents.length})
+                  </h3>
+                  <p className="text-[10px] text-[#474556]">
+                    Events currently visible to all students on Campus Wire
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 max-h-56 overflow-y-auto pr-1">
+                {approvedEvents.map((ev) => (
+                  <div
+                    key={ev.id}
+                    className="p-2.5 rounded-xl bg-[#f7f1ff] border border-[#e6deff]/50 flex items-center justify-between text-[12px]"
+                  >
+                    <div className="min-w-0 pr-2">
+                      <span className="font-extrabold text-[#1c163b] block truncate">{ev.title}</span>
+                      <span className="text-[10px] text-[#474556] truncate block">
+                        {ev.club} • {ev.date} • {ev.venue}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleReject(ev.id)}
+                      title="Remove event from Campus Wire"
+                      className="p-1.5 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer shrink-0"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Create Event Form */}
           <form onSubmit={handleCreateEvent} className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
             <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">

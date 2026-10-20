@@ -33,6 +33,8 @@ import {
   deleteConfessionFromDb,
   subscribeEvents,
   addEventToDb,
+  updateEventStatusInDb,
+  deleteEventFromDb,
   subscribeLostAndFound,
   addLostAndFoundToDb,
   toggleClaimLostAndFoundInDb,
@@ -394,9 +396,50 @@ export default function App() {
   }
 
   const handleAddEvent = async (event) => {
-    setEvents((prev) => [event, ...prev])
+    const eventWithStatus = { ...event, status: 'approved', submittedBy: 'Admin' }
+    setEvents((prev) => [eventWithStatus, ...prev])
     try {
-      await addEventToDb(event)
+      await addEventToDb(eventWithStatus)
+    } catch {
+      // Local fallback
+    }
+  }
+
+  // Student submits an event (pending admin approval)
+  const handleSubmitStudentEvent = async (event) => {
+    const pendingEvent = {
+      ...event,
+      id: `ev-${Date.now()}`,
+      status: 'pending',
+      submittedBy: event.submittedBy || 'Anonymous Student',
+      badge: 'STUDENT SUBMISSION',
+      badgeColor: 'bg-amber-500 text-white',
+    }
+    setEvents((prev) => [pendingEvent, ...prev])
+    try {
+      await addEventToDb(pendingEvent)
+    } catch {
+      // Local fallback
+    }
+  }
+
+  // Admin approves a pending event
+  const handleApproveEvent = async (id) => {
+    setEvents((prev) =>
+      prev.map((ev) => (ev.id === id ? { ...ev, status: 'approved' } : ev))
+    )
+    try {
+      await updateEventStatusInDb(id, 'approved')
+    } catch {
+      // Local fallback
+    }
+  }
+
+  // Admin rejects a pending event
+  const handleRejectEvent = async (id) => {
+    setEvents((prev) => prev.filter((ev) => ev.id !== id))
+    try {
+      await deleteEventFromDb(id)
     } catch {
       // Local fallback
     }
@@ -509,6 +552,7 @@ export default function App() {
             opportunities={opportunities}
             alert={radioState?.emergencyAlert}
             onAddLostFound={handleAddLostFound}
+            onSubmitEvent={handleSubmitStudentEvent}
           />
         )}
 
@@ -537,6 +581,8 @@ export default function App() {
             onUpdateConfessions={handleUpdateConfessions}
             events={events}
             onAddEvent={handleAddEvent}
+            onApproveEvent={handleApproveEvent}
+            onRejectEvent={handleRejectEvent}
             lostAndFound={lostAndFound}
             onUpdateLostAndFound={handleUpdateLostAndFound}
             auditions={auditions}

@@ -7,12 +7,21 @@ export function CampusWireScreen({
   opportunities,
   alert,
   onAddLostFound,
+  onSubmitEvent,
 }) {
   const [filterTab, setFilterTab] = useState('all') // 'all' | 'events' | 'lost' | 'opportunities'
   const [isLostFoundModalOpen, setIsLostFoundModalOpen] = useState(false)
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false)
   const [lfItem, setLfItem] = useState('')
   const [lfLocation, setLfLocation] = useState('')
   const [lfContact, setLfContact] = useState('')
+  const [evTitle, setEvTitle] = useState('')
+  const [evClub, setEvClub] = useState('')
+  const [evDate, setEvDate] = useState('')
+  const [evVenue, setEvVenue] = useState('')
+  const [evDesc, setEvDesc] = useState('')
+  const [evSubmitter, setEvSubmitter] = useState('')
+  const [eventSubmitted, setEventSubmitted] = useState(false)
 
   const handleReportLostFound = (e) => {
     e.preventDefault()
@@ -33,8 +42,37 @@ export function CampusWireScreen({
     setLfContact('')
   }
 
+  const handleSubmitEvent = (e) => {
+    e.preventDefault()
+    if (!evTitle.trim()) return
+
+    onSubmitEvent({
+      title: evTitle.trim(),
+      club: evClub.trim() || 'Student / Club',
+      date: evDate.trim() || 'TBD',
+      venue: evVenue.trim() || 'Campus',
+      desc: evDesc.trim() || '',
+      submittedBy: evSubmitter.trim() || 'Anonymous Student',
+    })
+
+    confetti({ particleCount: 20, spread: 40 })
+    setIsEventModalOpen(false)
+    setEvTitle('')
+    setEvClub('')
+    setEvDate('')
+    setEvVenue('')
+    setEvDesc('')
+    setEvSubmitter('')
+    setEventSubmitted(true)
+    setTimeout(() => setEventSubmitted(false), 4000)
+  }
+
+  // Separate approved events and student's pending submissions
+  const approvedEvents = events.filter((ev) => ev.status === 'approved' || !ev.status)
+  const pendingEvents = events.filter((ev) => ev.status === 'pending')
+
   const unclaimedLostCount = lostAndFound.filter((l) => !l.claimed).length
-  const totalCount = events.length + unclaimedLostCount + opportunities.length
+  const totalCount = approvedEvents.length + unclaimedLostCount + opportunities.length
 
   const categories = [
     {
@@ -50,12 +88,12 @@ export function CampusWireScreen({
     {
       id: 'events',
       title: 'Fest & Clubs',
-      subtitle: `${events.length} events`,
+      subtitle: `${approvedEvents.length} events`,
       icon: 'add_comment',
       bgClass: 'bg-gradient-to-br from-[#53df6d] to-[#3ece58]',
       hoverClass: 'hover:brightness-105',
       glowColor: 'rgba(79, 219, 106, 0.4)',
-      count: events.length,
+      count: approvedEvents.length,
     },
     {
       id: 'lost',
@@ -189,13 +227,73 @@ export function CampusWireScreen({
               <h3 className="text-[16px] font-extrabold text-[#1c163b]">Festivals & Club Events</h3>
               <p className="text-[11px] text-[#474556]">Official calendar of MES College of Engineering</p>
             </div>
-            <span className="material-symbols-outlined text-[#3814d4] text-[20px]">
-              event_upcoming
-            </span>
+            <button
+              onClick={() => setIsEventModalOpen(true)}
+              className="px-3 py-1.5 bg-[#3814d4] text-white text-[11px] font-extrabold rounded-full shadow-sm flex items-center gap-1 hover:bg-[#2400a0] transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[15px]">add</span>
+              <span>Submit Event</span>
+            </button>
           </div>
 
+          {/* Success Toast */}
+          {eventSubmitted && (
+            <div className="bg-green-50 border border-green-200 rounded-2xl p-3 flex items-center gap-2.5 animate-fadeIn">
+              <span className="material-symbols-outlined text-green-600 text-[20px]">check_circle</span>
+              <div>
+                <p className="text-[12px] font-bold text-green-800">Event submitted successfully!</p>
+                <p className="text-[10px] text-green-600">Your event will appear after admin approval.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Pending Events by this student (with visual indicator) */}
+          {pendingEvents.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
+                <span className="material-symbols-outlined text-[14px]">hourglass_top</span>
+                Awaiting Admin Approval ({pendingEvents.length})
+              </span>
+              {pendingEvents.map((ev) => (
+                <div
+                  key={ev.id}
+                  className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/60 shadow-sm flex flex-col gap-2 relative overflow-hidden"
+                >
+                  <div className="absolute top-0 left-0 w-1 h-full bg-amber-400 rounded-r-full" />
+                  <div className="flex items-start justify-between gap-2 pl-2">
+                    <div>
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-amber-500 text-white">
+                        PENDING REVIEW
+                      </span>
+                      <h4 className="text-[14px] font-black text-[#1c163b] mt-1 leading-snug">
+                        {ev.title}
+                      </h4>
+                      <p className="text-[11px] text-amber-700 font-bold mt-0.5">{ev.club}</p>
+                    </div>
+                    <span className="material-symbols-outlined text-amber-400 text-[20px] animate-pulse">
+                      pending
+                    </span>
+                  </div>
+                  {ev.desc && (
+                    <p className="text-[11px] text-[#474556] leading-relaxed pl-2">{ev.desc}</p>
+                  )}
+                  <div className="bg-amber-100/60 p-2 rounded-xl flex items-center justify-between text-[10px] font-bold text-amber-800 ml-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[14px]">calendar_month</span>
+                      <span>{ev.date}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[14px]">person</span>
+                      <span>{ev.submittedBy}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="flex flex-col gap-3">
-            {events.map((ev) => (
+            {approvedEvents.map((ev) => (
               <div
                 key={ev.id}
                 className="p-4 rounded-2xl bg-white border border-[#e6deff]/60 shadow-sm flex flex-col gap-2.5"
@@ -405,6 +503,116 @@ export function CampusWireScreen({
                 className="w-full py-3 rounded-2xl bg-[#3814d4] hover:bg-[#2400a0] text-white font-extrabold text-[13px] shadow-md transition-all cursor-pointer mt-1 active:scale-98"
               >
                 Post to Campus Wire & Radio Desk
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Submit Event for Admin Approval */}
+      {isEventModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl flex flex-col gap-3 relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setIsEventModalOpen(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f1ebff] text-[#474556] flex items-center justify-center hover:bg-[#e6deff] z-10"
+            >
+              <span className="material-symbols-outlined text-[18px]">close</span>
+            </button>
+
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#53df6d] to-[#3ece58] text-white flex items-center justify-center">
+                <span className="material-symbols-outlined text-[22px]">event</span>
+              </div>
+              <div>
+                <h3 className="text-[17px] font-black text-[#1c163b]">Submit an Event</h3>
+                <p className="text-[11px] text-[#474556]">Needs admin approval before publishing</p>
+              </div>
+            </div>
+
+            {/* Info Banner */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 flex items-start gap-2">
+              <span className="material-symbols-outlined text-blue-500 text-[16px] mt-0.5">info</span>
+              <p className="text-[10px] text-blue-700 leading-snug">
+                Your event will be reviewed by the MESCE FM admin team. Once approved, it'll appear on the Campus Wire for all students.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmitEvent} className="flex flex-col gap-2.5 mt-1">
+              <div>
+                <label className="text-[11px] font-bold text-[#474556] block mb-1">Event Title *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. TechFest 2026 / Coding Challenge / Art Exhibition"
+                  value={evTitle}
+                  onChange={(e) => setEvTitle(e.target.value)}
+                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] font-bold text-[#1c163b] outline-none focus:border-[#3814d4]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[11px] font-bold text-[#474556] block mb-1">Club / Society</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. IEEE / Arts Club"
+                    value={evClub}
+                    onChange={(e) => setEvClub(e.target.value)}
+                    className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-[#474556] block mb-1">Date(s)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Nov 15, 2026"
+                    value={evDate}
+                    onChange={(e) => setEvDate(e.target.value)}
+                    className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-[#474556] block mb-1">Venue</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Main Auditorium / Seminar Hall"
+                  value={evVenue}
+                  onChange={(e) => setEvVenue(e.target.value)}
+                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-[#474556] block mb-1">Description</label>
+                <textarea
+                  rows="2"
+                  placeholder="Tell us about the event, competitions, prizes, registration..."
+                  value={evDesc}
+                  onChange={(e) => setEvDesc(e.target.value)}
+                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl p-2.5 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                ></textarea>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-[#474556] block mb-1">Your Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Arun K. (ECE S6) / IEEE Secretary"
+                  value={evSubmitter}
+                  onChange={(e) => setEvSubmitter(e.target.value)}
+                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#3814d4] to-[#6e38d4] hover:from-[#2400a0] hover:to-[#5520b0] text-white font-extrabold text-[13px] shadow-md transition-all cursor-pointer mt-1 active:scale-98 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-[18px]">send</span>
+                Submit for Admin Review
               </button>
             </form>
           </div>
