@@ -28,7 +28,7 @@ export function AdminScreen({
   onSkipNext,
   onExitAdmin,
 }) {
-  const [activeAdminTab, setActiveAdminTab] = useState('studio') // 'studio' | 'moderation' | 'wire' | 'auditions' | 'music'
+  const [activeAdminTab, setActiveAdminTab] = useState('studio') // 'studio' | 'moderation' | 'wire' | 'auditions'
   const [isSeeding, setIsSeeding] = useState(false)
   const [seedStatus, setSeedStatus] = useState('')
 
@@ -205,7 +205,7 @@ export function AdminScreen({
       venue: evVenue.trim() || 'College Campus',
       desc: evDesc.trim() || 'Official college event announcement.',
       badge: 'CLUB EVENT',
-      badgeColor: 'bg-[#3814d4] text-white',
+      badgeColor: 'bg-[#ff7a00] text-white',
       status: 'approved',
       submittedBy: 'Studio Admin',
     })
@@ -250,18 +250,18 @@ export function AdminScreen({
     <div className="flex flex-col w-full pb-8">
       {/* Admin Top Master Header */}
       <div className="px-4 pt-2">
-        <div className="bg-[#1c163b] text-white p-4.5 rounded-3xl shadow-xl border border-[#3814d4]/40 flex flex-col gap-3">
+        <div className="bg-[#1c1c1e] text-white p-4.5 rounded-[28px] shadow-2xl border border-white/[0.08] flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#00d26a] animate-ping"></span>
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#ffdea8]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#00d26a] animate-ping"></span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#ff7a00]">
                 MESCE FM 108.1 • STANDALONE STUDIO CONSOLE
               </span>
             </div>
 
             <button
               onClick={onExitAdmin}
-              className="text-[11px] bg-white/15 hover:bg-white/25 px-2.5 py-1 rounded-full font-bold text-white flex items-center gap-1 cursor-pointer transition-colors"
+              className="text-[11px] bg-[#242426] hover:bg-[#2c2c2e] px-2.5 py-1 rounded-full font-bold text-white/90 border border-white/10 flex items-center gap-1 cursor-pointer transition-colors"
             >
               <span className="material-symbols-outlined text-[14px]">logout</span>
               <span>Exit Studio</span>
@@ -273,19 +273,19 @@ export function AdminScreen({
               <h2 className="text-[20px] font-black text-white leading-tight">
                 Radio Studio Command
               </h2>
-              <p className="text-[11px] text-[#c5c0ff]">
+              <p className="text-[11px] text-white/50">
                 Connected to Firebase Firestore (`mescefm`)
               </p>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-white">
+              <span className="text-[11px] font-bold text-white/90">
                 {isLive ? 'ON AIR' : 'OFFLINE'}
               </span>
               <button
                 onClick={() => setIsLive(!isLive)}
                 className={`w-12 h-6.5 rounded-full transition-colors relative cursor-pointer ${
-                  isLive ? 'bg-[#e40468]' : 'bg-[#777587]'
+                  isLive ? 'bg-[#ff7a00]' : 'bg-[#2c2c2e] border border-white/10'
                 }`}
               >
                 <span
@@ -298,46 +298,46 @@ export function AdminScreen({
           </div>
 
           {/* Database Seeder Button */}
-          <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+          <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between">
             <button
               onClick={handleSeedDatabase}
               disabled={isSeeding}
-              className="px-3 py-1.5 bg-[#e40468] hover:bg-[#b70051] text-white text-[11px] font-black rounded-xl shadow-md flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+              className="px-3 py-1.5 bg-[#ff7a00] hover:bg-[#ff8c1a] text-white text-[11px] font-black rounded-xl shadow-md flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[15px]">database</span>
               <span>{isSeeding ? 'Seeding Database...' : 'Seed / Sync Cloud Firestore'}</span>
             </button>
 
             {seedStatus && (
-              <span className="text-[10px] text-[#ffdea8] font-bold animate-pulse">
+              <span className="text-[10px] text-[#ff7a00] font-bold animate-pulse">
                 {seedStatus}
               </span>
             )}
           </div>
 
           {/* Metric Badges */}
-          <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-white/10 text-center">
-            <div className="bg-white/5 p-2 rounded-xl">
+          <div className="grid grid-cols-4 gap-1.5 pt-2 border-t border-white/[0.08] text-center">
+            <div className="bg-[#242426] border border-white/5 p-2 rounded-xl">
               <span className="text-[15px] font-black text-white font-mono">{listeners}</span>
-              <span className="text-[8.5px] text-[#c5c0ff] block uppercase">Live</span>
+              <span className="text-[8.5px] text-white/40 block uppercase">Live</span>
             </div>
-            <div className="bg-white/5 p-2 rounded-xl">
-              <span className="text-[15px] font-black text-[#ffdea8] font-mono">
+            <div className="bg-[#242426] border border-white/5 p-2 rounded-xl">
+              <span className="text-[15px] font-black text-[#ff7a00] font-mono">
                 {pendingRequestsCount}
               </span>
-              <span className="text-[8.5px] text-[#c5c0ff] block uppercase">Requests</span>
+              <span className="text-[8.5px] text-white/40 block uppercase">Requests</span>
             </div>
-            <div className="bg-white/5 p-2 rounded-xl">
-              <span className="text-[15px] font-black text-[#ffb1c1] font-mono">
+            <div className="bg-[#242426] border border-white/5 p-2 rounded-xl">
+              <span className="text-[15px] font-black text-[#00d26a] font-mono">
                 {pendingConfessionsCount}
               </span>
-              <span className="text-[8.5px] text-[#c5c0ff] block uppercase">Confess</span>
+              <span className="text-[8.5px] text-white/40 block uppercase">Confess</span>
             </div>
-            <div className="bg-white/5 p-2 rounded-xl">
-              <span className="text-[15px] font-black text-amber-300 font-mono">
+            <div className="bg-[#242426] border border-white/5 p-2 rounded-xl">
+              <span className="text-[15px] font-black text-amber-400 font-mono">
                 {pendingEvents.length}
               </span>
-              <span className="text-[8.5px] text-[#c5c0ff] block uppercase">Events</span>
+              <span className="text-[8.5px] text-white/40 block uppercase">Events</span>
             </div>
           </div>
         </div>
@@ -345,7 +345,7 @@ export function AdminScreen({
 
       {/* Admin Tab Selector */}
       <div className="px-4 mt-3">
-        <div className="grid grid-cols-4 gap-1.5 bg-[#f1ebff] p-1 rounded-2xl">
+        <div className="grid grid-cols-4 gap-1.5 bg-[#1c1c1e] border border-white/[0.08] p-1 rounded-2xl shadow-sm">
           {adminTabs.map((tab) => {
             const isActive = activeAdminTab === tab.id
             return (
@@ -354,14 +354,14 @@ export function AdminScreen({
                 onClick={() => setActiveAdminTab(tab.id)}
                 className={`py-2 px-1 rounded-xl text-[10px] font-extrabold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer relative ${
                   isActive
-                    ? 'bg-[#3814d4] text-white shadow-md'
-                    : 'text-[#474556] hover:text-[#3814d4]'
+                    ? 'bg-[#ff7a00] text-white shadow-md'
+                    : 'text-white/60 hover:text-white'
                 }`}
               >
                 <div className="relative flex items-center justify-center">
                   <span className="material-symbols-outlined text-[17px]">{tab.icon}</span>
                   {tab.badge && (
-                    <span className="absolute -top-1.5 -right-2.5 bg-[#e40468] text-white text-[8px] font-black min-w-[14px] h-[14px] px-1 rounded-full flex items-center justify-center shadow">
+                    <span className="absolute -top-1.5 -right-2.5 bg-[#ff3b30] text-white text-[8px] font-black min-w-[14px] h-[14px] px-1 rounded-full flex items-center justify-center shadow">
                       {tab.badge}
                     </span>
                   )}
@@ -377,16 +377,16 @@ export function AdminScreen({
       {activeAdminTab === 'studio' && (
         <div className="px-4 mt-3 flex flex-col gap-3">
           {/* Live Audio Playback & Real-Time Queue Manager */}
-          <div className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+          <div className="bg-[#1c1c1e] p-4.5 rounded-[28px] border border-white/[0.08] shadow-lg flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#00d26a] animate-pulse"></span>
-                <h3 className="text-[14px] font-black text-[#1c163b]">On-Air Playback & Audio Queue</h3>
+                <h3 className="text-[14px] font-black text-white">On-Air Playback & Audio Queue</h3>
               </div>
               <button
                 type="button"
                 onClick={onSkipNext}
-                className="px-2.5 py-1 bg-[#3814d4] text-white rounded-xl text-[10px] font-bold hover:bg-[#2400a0] flex items-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
+                className="px-2.5 py-1 bg-[#242426] hover:bg-[#2c2c2e] text-white rounded-xl text-[10px] font-bold border border-white/10 flex items-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
               >
                 <span>Skip to Next</span>
                 <span className="material-symbols-outlined text-[13px]">skip_next</span>
@@ -394,31 +394,36 @@ export function AdminScreen({
             </div>
 
             {/* Currently Playing Card */}
-            <div className="p-3 rounded-2xl bg-gradient-to-r from-[#ffd9df] to-[#f1ebff] border border-[#e40468]/30 flex items-center justify-between gap-2">
+            <div className="p-3 rounded-2xl bg-[#242426] border border-white/10 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2.5 min-w-0">
                 {radioState.currentShow?.nowPlaying?.cover ? (
                   <img
                     src={radioState.currentShow.nowPlaying.cover}
                     alt="Current cover"
                     className="w-11 h-11 rounded-xl object-cover shadow-xs shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null
+                      e.currentTarget.src =
+                        'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&auto=format&fit=crop&q=80'
+                    }}
                   />
                 ) : (
-                  <div className="w-11 h-11 rounded-xl bg-[#e40468] text-white flex items-center justify-center shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-[#ff7a00] text-white flex items-center justify-center shrink-0">
                     <span className="material-symbols-outlined text-[20px]">music_note</span>
                   </div>
                 )}
                 <div className="min-w-0">
-                  <span className="text-[9px] font-black uppercase text-[#e40468] flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#e40468] animate-ping"></span>
+                  <span className="text-[9px] font-black uppercase text-[#ff7a00] flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#ff7a00] animate-ping"></span>
                     BROADCASTING LIVE
                   </span>
-                  <h4 className="text-[13px] font-black text-[#1c163b] truncate">
+                  <h4 className="text-[13px] font-black text-white truncate">
                     {radioState.currentShow?.nowPlaying?.title || 'MESCE FM Track'}
                   </h4>
-                  <p className="text-[10px] text-[#474556] truncate">
+                  <p className="text-[10px] text-white/60 truncate">
                     {radioState.currentShow?.nowPlaying?.artist}
                     {radioState.currentShow?.nowPlaying?.dedication && (
-                      <span className="text-[#3814d4] font-bold ml-1">
+                      <span className="text-[#ff7a00] font-bold ml-1">
                         • Dedicated to {radioState.currentShow.nowPlaying.dedication.to}
                       </span>
                     )}
@@ -429,23 +434,23 @@ export function AdminScreen({
 
             {/* Queue List */}
             <div className="flex flex-col gap-1.5 mt-1">
-              <div className="flex items-center justify-between text-[11px] font-bold text-[#474556]">
+              <div className="flex items-center justify-between text-[11px] font-bold text-white/70">
                 <span>Up Next in Queue ({queue.length})</span>
-                {queue.length > 0 && <span className="text-[#3814d4]">Auto-plays after current song</span>}
+                {queue.length > 0 && <span className="text-[#ff7a00]">Auto-plays after current song</span>}
               </div>
 
               {queue.length === 0 ? (
-                <div className="p-3 rounded-2xl bg-[#f7f1ff] border border-[#e6deff]/40 text-center text-[11px] text-[#777587]">
+                <div className="p-3 rounded-2xl bg-[#242426] border border-white/10 text-center text-[11px] text-white/40">
                   Queue is empty. Station is rotating continuous curated Malayalam & campus hits.
                 </div>
               ) : (
                 queue.map((qTrack, qIdx) => (
                   <div
                     key={qTrack.id || qIdx}
-                    className="p-2.5 rounded-2xl bg-[#f7f1ff] border border-[#e6deff]/50 flex items-center justify-between gap-2"
+                    className="p-2.5 rounded-2xl bg-[#242426] border border-white/10 flex items-center justify-between gap-2"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-5 h-5 rounded-full bg-[#ebe5ff] text-[#3814d4] text-[10px] font-black flex items-center justify-center shrink-0 font-mono">
+                      <span className="w-5 h-5 rounded-full bg-[#2c2c2e] text-[#ff7a00] text-[10px] font-black flex items-center justify-center shrink-0 font-mono">
                         {qIdx + 1}
                       </span>
                       {qTrack.cover && (
@@ -453,11 +458,16 @@ export function AdminScreen({
                           src={qTrack.cover}
                           alt={qTrack.title}
                           className="w-8 h-8 rounded-lg object-cover shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null
+                            e.currentTarget.src =
+                              'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&auto=format&fit=crop&q=80'
+                          }}
                         />
                       )}
                       <div className="min-w-0">
-                        <p className="text-[12px] font-black text-[#1c163b] truncate">{qTrack.title}</p>
-                        <p className="text-[10px] text-[#777587] truncate">
+                        <p className="text-[12px] font-black text-white truncate">{qTrack.title}</p>
+                        <p className="text-[10px] text-white/50 truncate">
                           {qTrack.artist} {qTrack.dedication ? `(For ${qTrack.dedication.to})` : ''}
                         </p>
                       </div>
@@ -467,7 +477,7 @@ export function AdminScreen({
                       <button
                         type="button"
                         onClick={() => onPlayTrack && onPlayTrack(qTrack)}
-                        className="px-2 py-1 bg-[#3814d4] text-white rounded-lg text-[9px] font-bold hover:bg-[#2400a0] cursor-pointer"
+                        className="px-2 py-1 bg-[#ff7a00] hover:bg-[#ff8c1a] text-white rounded-lg text-[9px] font-bold cursor-pointer"
                         title="Broadcast immediately"
                       >
                         Play Now
@@ -475,7 +485,7 @@ export function AdminScreen({
                       <button
                         type="button"
                         onClick={() => onRemoveFromQueue && onRemoveFromQueue(qIdx)}
-                        className="w-6 h-6 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 flex items-center justify-center text-[11px] cursor-pointer"
+                        className="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 flex items-center justify-center text-[11px] cursor-pointer"
                         title="Remove from queue"
                       >
                         ✕
@@ -487,79 +497,79 @@ export function AdminScreen({
             </div>
           </div>
 
-          <form onSubmit={handleSaveStudio} className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
-              <h3 className="text-[15px] font-black text-[#1c163b] flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[#3814d4] text-[20px]">
+          <form onSubmit={handleSaveStudio} className="bg-[#1c1c1e] p-4.5 rounded-[28px] border border-white/[0.08] shadow-lg flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
+              <h3 className="text-[15px] font-black text-white flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[#ff7a00] text-[20px]">
                   broadcast_on_home
                 </span>
                 Live Broadcast Parameters
               </h3>
-              <span className="text-[10px] font-bold text-[#e40468]">108.1 FM</span>
+              <span className="text-[10px] font-bold text-[#ff7a00]">108.1 FM</span>
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-[#474556] block mb-1">Current Show Title</label>
+              <label className="text-[11px] font-bold text-white/70 block mb-1">Current Show Title</label>
               <input
                 type="text"
                 value={showTitle}
                 onChange={(e) => setShowTitle(e.target.value)}
-                className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[13px] font-bold text-[#1c163b] outline-none focus:border-[#3814d4]"
+                className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[13px] font-bold text-white outline-none focus:border-[#ff7a00]"
               />
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-[#474556] block mb-1">RJ / Hosts on Air</label>
+              <label className="text-[11px] font-bold text-white/70 block mb-1">RJ / Hosts on Air</label>
               <input
                 type="text"
                 value={showRj}
                 onChange={(e) => setShowRj(e.target.value)}
-                className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[11px] font-bold text-[#474556] block mb-1">Currently Playing Track</label>
+                <label className="text-[11px] font-bold text-white/70 block mb-1">Currently Playing Track</label>
                 <input
                   type="text"
                   value={trackTitle}
                   onChange={(e) => setTrackTitle(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] font-bold text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] font-bold text-white outline-none focus:border-[#ff7a00]"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-[#474556] block mb-1">Artist / Band Name</label>
+                <label className="text-[11px] font-bold text-white/70 block mb-1">Artist / Band Name</label>
                 <input
                   type="text"
                   value={trackArtist}
                   onChange={(e) => setTrackArtist(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-[#474556] block mb-1">Live Campus Listeners Count</label>
+              <label className="text-[11px] font-bold text-white/70 block mb-1">Live Campus Listeners Count</label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
                   value={listeners}
                   onChange={(e) => setListeners(e.target.value)}
-                  className="w-32 bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[13px] font-mono font-bold text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-32 bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[13px] font-mono font-bold text-white outline-none focus:border-[#ff7a00]"
                 />
                 <button
                   type="button"
                   onClick={() => setListeners((prev) => parseInt(prev) + 25)}
-                  className="px-2.5 py-1.5 bg-[#f1ebff] hover:bg-[#e6deff] text-[#3814d4] rounded-lg text-xs font-bold cursor-pointer"
+                  className="px-2.5 py-1.5 bg-[#2c2c2e] hover:bg-[#38383a] text-white rounded-lg text-xs font-bold cursor-pointer border border-white/5"
                 >
                   +25
                 </button>
                 <button
                   type="button"
                   onClick={() => setListeners((prev) => Math.max(0, parseInt(prev) - 25))}
-                  className="px-2.5 py-1.5 bg-[#f1ebff] hover:bg-[#e6deff] text-[#3814d4] rounded-lg text-xs font-bold cursor-pointer"
+                  className="px-2.5 py-1.5 bg-[#2c2c2e] hover:bg-[#38383a] text-white rounded-lg text-xs font-bold cursor-pointer border border-white/5"
                 >
                   -25
                 </button>
@@ -567,17 +577,17 @@ export function AdminScreen({
             </div>
 
             {/* Emergency Banner Toggle */}
-            <div className="pt-2 border-t border-[#f1ebff] flex flex-col gap-2">
+            <div className="pt-2 border-t border-white/[0.08] flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[12px] font-black text-[#1c163b]">Emergency Campus Notice</span>
-                  <p className="text-[10px] text-[#474556]">High priority broadcast alert banner</p>
+                  <span className="text-[12px] font-black text-white">Emergency Campus Notice</span>
+                  <p className="text-[10px] text-white/50">High priority broadcast alert banner</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setAlertActive(!alertActive)}
                   className={`w-12 h-6.5 rounded-full transition-colors relative cursor-pointer ${
-                    alertActive ? 'bg-[#e40468]' : 'bg-[#e6deff]'
+                    alertActive ? 'bg-[#ff3b30]' : 'bg-[#2c2c2e] border border-white/10'
                   }`}
                 >
                   <span
@@ -589,20 +599,20 @@ export function AdminScreen({
               </div>
 
               {alertActive && (
-                <div className="flex flex-col gap-2 bg-[#fff0f4] p-3 rounded-2xl border border-[#ffb1c1]">
+                <div className="flex flex-col gap-2 bg-[#ff3b30]/10 p-3 rounded-2xl border border-[#ff3b30]/30">
                   <input
                     type="text"
                     value={alertTitle}
                     onChange={(e) => setAlertTitle(e.target.value)}
                     placeholder="Alert Title (e.g. CAMPUS NOTICE: Auditions Today)"
-                    className="w-full bg-white border border-[#ffb1c1] rounded-xl px-3 py-1.5 text-[12px] font-bold text-[#3f0017]"
+                    className="w-full bg-[#1c1c1e] border border-[#ff3b30]/40 rounded-xl px-3 py-1.5 text-[12px] font-bold text-white placeholder-white/40"
                   />
                   <textarea
                     rows="2"
                     value={alertDetails}
                     onChange={(e) => setAlertDetails(e.target.value)}
                     placeholder="Alert details text..."
-                    className="w-full bg-white border border-[#ffb1c1] rounded-xl p-2 text-[11px] text-[#3f0017]"
+                    className="w-full bg-[#1c1c1e] border border-[#ff3b30]/40 rounded-xl p-2 text-[11px] text-white placeholder-white/40"
                   ></textarea>
                 </div>
               )}
@@ -610,7 +620,7 @@ export function AdminScreen({
 
             <button
               type="submit"
-              className="w-full py-3 bg-[#3814d4] hover:bg-[#2400a0] text-white font-black text-[13px] rounded-2xl shadow-md transition-all cursor-pointer active:scale-98 mt-1"
+              className="w-full py-3 bg-[#ff7a00] hover:bg-[#ff8c1a] text-white font-black text-[13px] rounded-2xl shadow-lg transition-all cursor-pointer active:scale-98 mt-1"
             >
               Push Updates to Campus Broadcast & Firestore
             </button>
@@ -622,13 +632,13 @@ export function AdminScreen({
       {activeAdminTab === 'moderation' && (
         <div className="px-4 mt-3 flex flex-col gap-4">
           {/* Song Requests Moderation */}
-          <div className="bg-white p-4 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+          <div className="bg-[#1c1c1e] p-4.5 rounded-[28px] border border-white/[0.08] shadow-lg flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
               <div>
-                <h3 className="text-[14px] font-black text-[#1c163b]">Song Requests Queue</h3>
-                <p className="text-[10px] text-[#474556]">Review and approve incoming dedications</p>
+                <h3 className="text-[14px] font-black text-white">Song Requests Queue</h3>
+                <p className="text-[10px] text-white/50">Review and approve incoming dedications</p>
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-[#ebe5ff] text-[#3814d4] text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-[#242426] text-[#ff7a00] border border-white/10 text-[10px] font-bold">
                 {songRequests.length} Total
               </span>
             </div>
@@ -637,7 +647,7 @@ export function AdminScreen({
               {songRequests.map((req) => (
                 <div
                   key={req.id}
-                  className="p-3.5 rounded-2xl bg-[#f7f1ff] border border-[#e6deff]/40 flex flex-col gap-2"
+                  className="p-3.5 rounded-2xl bg-[#242426] border border-white/10 flex flex-col gap-2"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -646,43 +656,48 @@ export function AdminScreen({
                           src={req.cover}
                           alt={req.songTitle}
                           className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-xs"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null
+                            e.currentTarget.src =
+                              'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&auto=format&fit=crop&q=80'
+                          }}
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-xl bg-[#3814d4]/10 text-[#3814d4] flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-[#ff7a00]/20 text-[#ff7a00] flex items-center justify-center shrink-0">
                           <span className="material-symbols-outlined text-[20px]">music_note</span>
                         </div>
                       )}
                       <div className="min-w-0">
-                        <h4 className="text-[13px] font-black text-[#1c163b] truncate">{req.songTitle}</h4>
-                        <p className="text-[11px] text-[#474556] truncate">{req.artist}</p>
+                        <h4 className="text-[13px] font-black text-white truncate">{req.songTitle}</h4>
+                        <p className="text-[11px] text-white/60 truncate">{req.artist}</p>
                       </div>
                     </div>
 
                     <span
                       className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
                         req.status === 'Now Playing'
-                          ? 'bg-[#ffd9df] text-[#e40468] animate-pulse'
+                          ? 'bg-[#ff7a00]/20 text-[#ff7a00] border border-[#ff7a00]/30 animate-pulse'
                           : req.status === 'Queued (Up Next)' || req.status === 'Playing Soon'
-                          ? 'bg-[#e3dfff] text-[#140067]'
+                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                           : req.status === 'Approved'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-amber-100 text-amber-800'
+                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                          : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                       }`}
                     >
                       {req.status}
                     </span>
                   </div>
 
-                  <p className="text-[11px] text-[#3814d4] font-semibold">
+                  <p className="text-[11px] text-[#ff7a00] font-semibold">
                     From: {req.requester} ➔ Dedicated to: {req.dedicationTo}
                   </p>
-                  <p className="text-[11px] text-[#474556] italic">"{req.message}"</p>
+                  <p className="text-[11px] text-white/70 italic">"{req.message}"</p>
 
-                  <div className="flex items-center justify-end gap-1.5 pt-1.5 border-t border-[#e6deff]/40">
+                  <div className="flex items-center justify-end gap-1.5 pt-1.5 border-t border-white/[0.08]">
                     <button
                       type="button"
                       onClick={() => handlePlayRequestNow(req)}
-                      className="px-2.5 py-1 bg-[#e40468] hover:bg-[#b70051] text-white rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1 shadow-xs"
+                      className="px-2.5 py-1 bg-[#ff7a00] hover:bg-[#ff8c1a] text-white rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1 shadow-xs"
                       title="Broadcast immediately on air"
                     >
                       <span className="material-symbols-outlined text-[13px]">bolt</span>
@@ -691,7 +706,7 @@ export function AdminScreen({
                     <button
                       type="button"
                       onClick={() => handleQueueRequestNext(req)}
-                      className="px-2.5 py-1 bg-[#3814d4] hover:bg-[#2400a0] text-white rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1 shadow-xs"
+                      className="px-2.5 py-1 bg-[#2c2c2e] hover:bg-[#38383a] text-white rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1 border border-white/10"
                       title="Add to queue to play right after current track"
                     >
                       <span className="material-symbols-outlined text-[13px]">queue_music</span>
@@ -700,14 +715,14 @@ export function AdminScreen({
                     <button
                       type="button"
                       onClick={() => handleUpdateRequestStatus(req.id, 'Approved')}
-                      className="px-2.5 py-1 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-[10px] font-bold cursor-pointer"
+                      className="px-2.5 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 rounded-lg text-[10px] font-bold cursor-pointer"
                     >
                       Approve
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteRequest(req.id)}
-                      className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-[10px] font-bold cursor-pointer"
+                      className="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-rose-400 border border-red-500/30 rounded-lg text-[10px] font-bold cursor-pointer"
                     >
                       Dismiss
                     </button>
@@ -718,13 +733,13 @@ export function AdminScreen({
           </div>
 
           {/* Confessions Moderation */}
-          <div className="bg-white p-4 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+          <div className="bg-[#1c1c1e] p-4.5 rounded-[28px] border border-white/[0.08] shadow-lg flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
               <div>
-                <h3 className="text-[14px] font-black text-[#1c163b]">Confessions Moderation Wall</h3>
-                <p className="text-[10px] text-[#474556]">Filter abusive or inappropriate submissions</p>
+                <h3 className="text-[14px] font-black text-white">Confessions Moderation Wall</h3>
+                <p className="text-[10px] text-white/50">Filter abusive or inappropriate submissions</p>
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-[#ffd9df] text-[#e40468] text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-[#242426] text-[#ff7a00] border border-white/10 text-[10px] font-bold">
                 {confessions.length} Posts
               </span>
             </div>
@@ -733,39 +748,39 @@ export function AdminScreen({
               {confessions.map((conf) => (
                 <div
                   key={conf.id}
-                  className="p-3.5 rounded-2xl bg-[#fdf8ff] border border-[#e6deff]/50 flex flex-col gap-2"
+                  className="p-3.5 rounded-2xl bg-[#242426] border border-white/10 flex flex-col gap-2"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#f1ebff] text-[#3814d4]">
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#2c2c2e] text-[#ff7a00] border border-white/10">
                       {conf.tag}
                     </span>
                     <span
                       className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase ${
                         conf.status === 'Approved'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-amber-100 text-amber-800 animate-pulse'
+                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                          : 'bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse'
                       }`}
                     >
                       {conf.status || 'Approved'}
                     </span>
                   </div>
 
-                  <p className="text-[12px] text-[#1c163b] leading-relaxed">
+                  <p className="text-[12px] text-white/90 leading-relaxed">
                     "{conf.content}"
                   </p>
 
-                  <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-[#f1ebff]">
+                  <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-white/[0.08]">
                     {conf.status === 'Pending' && (
                       <button
                         onClick={() => handleApproveConfession(conf.id)}
-                        className="px-3 py-1 bg-green-600 text-white rounded-lg text-[10px] font-bold hover:bg-green-700 cursor-pointer"
+                        className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg text-[10px] font-bold cursor-pointer"
                       >
                         Approve & Publish
                       </button>
                     )}
                     <button
                       onClick={() => handleRejectConfession(conf.id)}
-                      className="px-2.5 py-1 bg-red-100 text-red-700 rounded-lg text-[10px] font-bold hover:bg-red-200 cursor-pointer"
+                      className="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 rounded-lg text-[10px] font-bold cursor-pointer"
                     >
                       Reject / Remove
                     </button>
@@ -781,33 +796,33 @@ export function AdminScreen({
       {activeAdminTab === 'wire' && (
         <div className="px-4 mt-3 flex flex-col gap-4">
           {/* Student Submissions Moderation Queue */}
-          <div className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+          <div className="bg-[#1c1c1e] p-4.5 rounded-[28px] border border-white/[0.08] shadow-lg flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
               <div>
-                <h3 className="text-[14px] font-black text-[#1c163b] flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-amber-500 text-[20px]">
+                <h3 className="text-[14px] font-black text-white flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-amber-400 text-[20px]">
                     pending_actions
                   </span>
                   Student Event Submissions
                 </h3>
-                <p className="text-[10px] text-[#474556]">
+                <p className="text-[10px] text-white/50">
                   Events submitted by students requiring review before broadcasting
                 </p>
               </div>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                pendingEvents.length > 0 ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-500'
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                pendingEvents.length > 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-[#242426] text-white/40 border-white/10'
               }`}>
                 {pendingEvents.length} Pending
               </span>
             </div>
 
             {pendingEvents.length === 0 ? (
-              <div className="text-center py-5 px-4 bg-[#fbf9ff] rounded-2xl border border-dashed border-[#e6deff]">
-                <span className="material-symbols-outlined text-[30px] text-gray-400">
+              <div className="text-center py-5 px-4 bg-[#242426] rounded-2xl border border-dashed border-white/10">
+                <span className="material-symbols-outlined text-[30px] text-white/40">
                   task_alt
                 </span>
-                <p className="text-[12px] font-bold text-[#1c163b] mt-1">All events reviewed!</p>
-                <p className="text-[10px] text-[#777587]">
+                <p className="text-[12px] font-bold text-white mt-1">All events reviewed!</p>
+                <p className="text-[10px] text-white/50">
                   New student event proposals from Campus Wire will appear here.
                 </p>
               </div>
@@ -816,53 +831,53 @@ export function AdminScreen({
                 {pendingEvents.map((ev) => (
                   <div
                     key={ev.id}
-                    className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex flex-col gap-2.5 relative overflow-hidden"
+                    className="p-3.5 rounded-2xl bg-[#242426] border border-amber-500/40 flex flex-col gap-2.5 relative overflow-hidden"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-amber-500 text-white">
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-amber-500 text-black">
                             AWAITING APPROVAL
                           </span>
-                          <span className="text-[10px] text-amber-800 font-bold">
+                          <span className="text-[10px] text-amber-300 font-bold">
                             By {ev.submittedBy || 'Student'}
                           </span>
                         </div>
-                        <h4 className="text-[14px] font-black text-[#1c163b] mt-1 leading-snug">
+                        <h4 className="text-[14px] font-black text-white mt-1 leading-snug">
                           {ev.title}
                         </h4>
-                        <p className="text-[11px] text-[#3814d4] font-bold">{ev.club}</p>
+                        <p className="text-[11px] text-[#ff7a00] font-bold">{ev.club}</p>
                       </div>
                     </div>
 
                     {ev.desc && (
-                      <p className="text-[11px] text-[#474556] leading-relaxed bg-white/70 p-2 rounded-xl border border-amber-100">
+                      <p className="text-[11px] text-white/70 leading-relaxed bg-[#1c1c1e] p-2 rounded-xl border border-white/10">
                         {ev.desc}
                       </p>
                     )}
 
-                    <div className="grid grid-cols-2 gap-2 text-[10px] font-bold text-[#474556]">
+                    <div className="grid grid-cols-2 gap-2 text-[10px] font-bold text-white/60">
                       <span className="flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[13px] text-amber-600">calendar_today</span>
+                        <span className="material-symbols-outlined text-[13px] text-amber-400">calendar_today</span>
                         {ev.date}
                       </span>
                       <span className="flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[13px] text-amber-600">location_on</span>
+                        <span className="material-symbols-outlined text-[13px] text-amber-400">location_on</span>
                         {ev.venue}
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-amber-200/60">
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/[0.08]">
                       <button
                         onClick={() => handleReject(ev.id)}
-                        className="px-3 py-1.5 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-[11px] font-bold rounded-xl cursor-pointer transition-colors flex items-center gap-1"
+                        className="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 text-[11px] font-bold rounded-xl cursor-pointer transition-colors flex items-center gap-1"
                       >
                         <span className="material-symbols-outlined text-[14px]">close</span>
                         <span>Reject</span>
                       </button>
                       <button
                         onClick={() => handleApprove(ev.id)}
-                        className="px-3.5 py-1.5 bg-green-600 hover:bg-green-700 text-white text-[11px] font-extrabold rounded-xl shadow-sm cursor-pointer transition-colors flex items-center gap-1"
+                        className="px-3.5 py-1.5 bg-[#ff7a00] hover:bg-[#ff8c1a] text-white text-[11px] font-extrabold rounded-xl shadow-sm cursor-pointer transition-colors flex items-center gap-1"
                       >
                         <span className="material-symbols-outlined text-[14px]">check</span>
                         <span>Approve & Broadcast</span>
@@ -876,16 +891,16 @@ export function AdminScreen({
 
           {/* Active Live Published Events */}
           {approvedEvents.length > 0 && (
-            <div className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
-              <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+            <div className="bg-[#1c1c1e] p-4.5 rounded-[28px] border border-white/[0.08] shadow-lg flex flex-col gap-3">
+              <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
                 <div>
-                  <h3 className="text-[14px] font-black text-[#1c163b] flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[#3814d4] text-[20px]">
+                  <h3 className="text-[14px] font-black text-white flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[#ff7a00] text-[20px]">
                       event_available
                     </span>
                     Live Published Events ({approvedEvents.length})
                   </h3>
-                  <p className="text-[10px] text-[#474556]">
+                  <p className="text-[10px] text-white/50">
                     Events currently visible to all students on Campus Wire
                   </p>
                 </div>
@@ -895,18 +910,18 @@ export function AdminScreen({
                 {approvedEvents.map((ev) => (
                   <div
                     key={ev.id}
-                    className="p-2.5 rounded-xl bg-[#f7f1ff] border border-[#e6deff]/50 flex items-center justify-between text-[12px]"
+                    className="p-2.5 rounded-xl bg-[#242426] border border-white/10 flex items-center justify-between text-[12px]"
                   >
                     <div className="min-w-0 pr-2">
-                      <span className="font-extrabold text-[#1c163b] block truncate">{ev.title}</span>
-                      <span className="text-[10px] text-[#474556] truncate block">
+                      <span className="font-extrabold text-white block truncate">{ev.title}</span>
+                      <span className="text-[10px] text-white/50 truncate block">
                         {ev.club} • {ev.date} • {ev.venue}
                       </span>
                     </div>
                     <button
                       onClick={() => handleReject(ev.id)}
                       title="Remove event from Campus Wire"
-                      className="p-1.5 text-gray-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer shrink-0"
+                      className="p-1.5 text-white/40 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
                     >
                       <span className="material-symbols-outlined text-[16px]">delete</span>
                     </button>
@@ -917,10 +932,10 @@ export function AdminScreen({
           )}
 
           {/* Create Event Form */}
-          <form onSubmit={handleCreateEvent} className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
-              <h3 className="text-[14px] font-black text-[#1c163b] flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[#3814d4] text-[20px]">
+          <form onSubmit={handleCreateEvent} className="bg-[#1c1c1e] p-4.5 rounded-[28px] border border-white/[0.08] shadow-lg flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
+              <h3 className="text-[14px] font-black text-white flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[#ff7a00] text-[20px]">
                   add_circle
                 </span>
                 Publish New Fest or Club Event
@@ -928,90 +943,90 @@ export function AdminScreen({
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-[#474556] block mb-1">Event Title *</label>
+              <label className="text-[11px] font-bold text-white/70 block mb-1">Event Title *</label>
               <input
                 type="text"
                 required
                 placeholder="e.g. Nakshatra 2026 / Hack-MES / Robo-Wars"
                 value={evTitle}
                 onChange={(e) => setEvTitle(e.target.value)}
-                className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] font-bold text-[#1c163b] outline-none focus:border-[#3814d4]"
+                className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] font-bold text-white outline-none focus:border-[#ff7a00]"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[11px] font-bold text-[#474556] block mb-1">Organizing Club</label>
+                <label className="text-[11px] font-bold text-white/70 block mb-1">Organizing Club</label>
                 <input
                   type="text"
                   placeholder="e.g. IEEE / IEDC / Arts Club"
                   value={evClub}
                   onChange={(e) => setEvClub(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-[#474556] block mb-1">Dates</label>
+                <label className="text-[11px] font-bold text-white/70 block mb-1">Dates</label>
                 <input
                   type="text"
                   placeholder="e.g. Nov 12 – 14, 2026"
                   value={evDate}
                   onChange={(e) => setEvDate(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-[#474556] block mb-1">Venue on Campus</label>
+              <label className="text-[11px] font-bold text-white/70 block mb-1">Venue on Campus</label>
               <input
                 type="text"
                 placeholder="e.g. Main Auditorium / Civil Seminar Hall"
                 value={evVenue}
                 onChange={(e) => setEvVenue(e.target.value)}
-                className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
               />
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-[#474556] block mb-1">Short Description</label>
+              <label className="text-[11px] font-bold text-white/70 block mb-1">Short Description</label>
               <textarea
                 rows="2"
                 placeholder="Details, competitions, registration links..."
                 value={evDesc}
                 onChange={(e) => setEvDesc(e.target.value)}
-                className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl p-2.5 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                className="w-full bg-[#242426] border border-white/10 rounded-xl p-2.5 text-[12px] text-white outline-none focus:border-[#ff7a00]"
               ></textarea>
             </div>
 
             <button
               type="submit"
-              className="w-full py-2.5 bg-[#3814d4] hover:bg-[#2400a0] text-white font-extrabold text-[12px] rounded-xl shadow-md cursor-pointer transition-all active:scale-98"
+              className="w-full py-2.5 bg-[#ff7a00] hover:bg-[#ff8c1a] text-white font-extrabold text-[12px] rounded-xl shadow-md cursor-pointer transition-all active:scale-98"
             >
               Broadcast on Campus Wire & Radio
             </button>
           </form>
 
           {/* Manage Lost & Found items */}
-          <div className="bg-white p-4 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-2.5">
-            <h3 className="text-[14px] font-black text-[#1c163b]">Lost & Found Item Status</h3>
+          <div className="bg-[#1c1c1e] p-4.5 rounded-[28px] border border-white/[0.08] shadow-lg flex flex-col gap-2.5">
+            <h3 className="text-[14px] font-black text-white">Lost & Found Item Status</h3>
             <div className="flex flex-col gap-2">
               {lostAndFound.map((lf) => (
                 <div
                   key={lf.id}
-                  className="p-2.5 rounded-xl bg-[#f7f1ff] flex items-center justify-between text-[12px]"
+                  className="p-2.5 rounded-xl bg-[#242426] border border-white/10 flex items-center justify-between text-[12px]"
                 >
                   <div className="min-w-0 pr-2">
-                    <span className="font-extrabold text-[#1c163b] block truncate">{lf.item}</span>
-                    <span className="text-[10px] text-[#474556] truncate">{lf.location}</span>
+                    <span className="font-extrabold text-white block truncate">{lf.item}</span>
+                    <span className="text-[10px] text-white/50 truncate">{lf.location}</span>
                   </div>
                   <button
                     onClick={() => handleToggleClaimed(lf.id)}
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold cursor-pointer transition-all ${
                       lf.claimed
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-amber-100 text-amber-800'
+                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                     }`}
                   >
                     {lf.claimed ? 'Mark Unclaimed' : 'Mark Claimed'}
@@ -1026,13 +1041,13 @@ export function AdminScreen({
       {/* SECTION 4: RJ Auditions & Guest Hosts */}
       {activeAdminTab === 'auditions' && (
         <div className="px-4 mt-3 flex flex-col gap-3">
-          <div className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+          <div className="bg-[#1c1c1e] p-4.5 rounded-[28px] border border-white/[0.08] shadow-lg flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
               <div>
-                <h3 className="text-[14px] font-black text-[#1c163b]">RJ Auditions & Applications</h3>
-                <p className="text-[10px] text-[#474556]">Students applying for radio shows and guest hosting</p>
+                <h3 className="text-[14px] font-black text-white">RJ Auditions & Applications</h3>
+                <p className="text-[10px] text-white/50">Students applying for radio shows and guest hosting</p>
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-[#ffd9df] text-[#e40468] text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-[#242426] text-[#ff7a00] border border-white/10 text-[10px] font-bold">
                 {auditions.length} Applications
               </span>
             </div>
@@ -1041,51 +1056,51 @@ export function AdminScreen({
               {auditions.map((aud) => (
                 <div
                   key={aud.id}
-                  className="p-3.5 rounded-2xl bg-[#f7f1ff] border border-[#e6deff]/50 flex flex-col gap-2"
+                  className="p-3.5 rounded-2xl bg-[#242426] border border-white/10 flex flex-col gap-2"
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <h4 className="text-[13px] font-black text-[#1c163b]">
+                      <h4 className="text-[13px] font-black text-white">
                         {aud.applicantName}
                       </h4>
-                      <p className="text-[11px] text-[#3814d4] font-bold">{aud.dept}</p>
+                      <p className="text-[11px] text-[#ff7a00] font-bold">{aud.dept}</p>
                     </div>
                     <span
                       className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase ${
                         aud.status.includes('Approved')
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-amber-100 text-amber-800'
+                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                          : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                       }`}
                     >
                       {aud.status}
                     </span>
                   </div>
 
-                  <p className="text-[11px] text-[#1c163b] font-medium leading-snug">
-                    <span className="font-bold text-[#474556]">Show Pitch:</span> {aud.showConcept}
+                  <p className="text-[11px] text-white/80 font-medium leading-snug">
+                    <span className="font-bold text-white/50">Show Pitch:</span> {aud.showConcept}
                   </p>
 
-                  <div className="flex items-center justify-between text-[10px] text-[#777587]">
+                  <div className="flex items-center justify-between text-[10px] text-white/40">
                     <span>Preferred: {aud.preferredTime}</span>
-                    <span className="font-semibold text-[#3814d4]">🎵 {aud.sampleVoiceClip}</span>
+                    <span className="font-semibold text-[#ff7a00]">🎵 {aud.sampleVoiceClip}</span>
                   </div>
 
-                  <div className="flex items-center justify-end gap-1.5 pt-1.5 border-t border-[#e6deff]/40">
+                  <div className="flex items-center justify-end gap-1.5 pt-1.5 border-t border-white/[0.08]">
                     <button
                       onClick={() => handleAuditionStatus(aud.id, 'Approved for Pilot')}
-                      className="px-2.5 py-1 bg-green-600 text-white rounded-lg text-[10px] font-bold hover:bg-green-700 cursor-pointer"
+                      className="px-2.5 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg text-[10px] font-bold cursor-pointer"
                     >
                       Approve for Pilot
                     </button>
                     <button
                       onClick={() => handleAuditionStatus(aud.id, 'Interview Scheduled')}
-                      className="px-2.5 py-1 bg-[#3814d4] text-white rounded-lg text-[10px] font-bold hover:bg-[#2400a0] cursor-pointer"
+                      className="px-2.5 py-1 bg-[#ff7a00] hover:bg-[#ff8c1a] text-white rounded-lg text-[10px] font-bold cursor-pointer"
                     >
                       Schedule Audition
                     </button>
                     <button
                       onClick={() => handleAuditionStatus(aud.id, 'Declined')}
-                      className="px-2 py-1 bg-red-100 text-red-700 rounded-lg text-[10px] font-bold cursor-pointer"
+                      className="px-2 py-1 bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-lg text-[10px] font-bold cursor-pointer"
                     >
                       Decline
                     </button>

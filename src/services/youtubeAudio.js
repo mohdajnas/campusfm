@@ -12,6 +12,7 @@ class YouTubeAudioService {
     this.onStateChangeCallback = null
     this.onTimeUpdateCallback = null
     this.onEndedCallback = null
+    this.onErrorCallback = null
 
     this.loadAPI()
   }
@@ -61,7 +62,7 @@ class YouTubeAudioService {
       this.player = new window.YT.Player('mesce-yt-audio-container', {
         height: '1',
         width: '1',
-        videoId: 'tOM-nWPcR4U', // Default starter (Illuminati full track)
+        videoId: 'M7lc1UVf-VE', // Clean YouTube developer test embed
         playerVars: {
           autoplay: 0,
           controls: 0,
@@ -81,10 +82,14 @@ class YouTubeAudioService {
             this.handlePlayerStateChange(event.data)
           },
           onError: (event) => {
-            console.warn('YouTube audio player note (code ' + event.data + '), auto-advancing to next track.')
-            setTimeout(() => {
-              if (this.onEndedCallback) this.onEndedCallback()
-            }, 1500)
+            const code = event.data
+            console.warn(`YouTube audio player reported note (code ${code}) for track "${this.currentTrack?.title || 'init'}"`)
+            this.isPlaying = false
+            this.stopPolling()
+            if (this.onStateChangeCallback) this.onStateChangeCallback(false)
+            if (this.onErrorCallback) {
+              this.onErrorCallback(code, this.currentTrack)
+            }
           },
         },
       })

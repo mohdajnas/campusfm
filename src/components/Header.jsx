@@ -28,25 +28,23 @@ export function Header({
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 bg-[#fdf8ff]/90 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-[#e6deff]/50">
+    <header className="fixed top-0 left-0 right-0 z-40 bg-white/85 backdrop-blur-xl pt-safe shadow-[0_2px_14px_rgba(0,0,0,0.06)] border-b border-black/[0.06]">
       <div className="max-w-md mx-auto h-16 px-4 flex items-center justify-between">
         {/* Brand / Logo */}
         <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#2400a0] via-[#3814d4] to-[#e40468] p-0.5 shadow-md flex items-center justify-center shrink-0">
-            <div className="w-full h-full rounded-[14px] bg-[#3814d4] flex items-center justify-center text-white">
-              <span className="material-symbols-outlined text-[22px] text-white">radio</span>
-            </div>
+          <div className="w-10 h-10 rounded-2xl bg-[#1c1c1e] border border-white/10 p-0.5 shadow-md flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[22px] text-[#ff7a00]">radio</span>
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <span className="text-[17px] font-black text-[#3814d4] leading-tight tracking-tight">
+              <span className="text-[17px] font-black text-neutral-900 leading-tight tracking-tight">
                 MESCE FM
               </span>
-              <span className="px-1.5 py-0.2 rounded-md bg-[#e40468] text-white text-[10px] font-black tracking-wide">
+              <span className="px-1.5 py-0.2 rounded-md bg-[#ff7a00] text-black text-[10px] font-black tracking-wide">
                 108.1
               </span>
             </div>
-            <span className="text-[10px] text-[#474556] font-semibold uppercase tracking-wider truncate max-w-[170px]">
+            <span className="text-[10px] text-neutral-500 font-semibold uppercase tracking-wider truncate max-w-[170px]">
               {getSubTitle()}
             </span>
           </div>
@@ -61,11 +59,11 @@ export function Header({
               if (onOpenNotifications) onOpenNotifications()
             }}
             aria-label="Campus Radio Alerts"
-            className="w-10 h-10 flex items-center justify-center rounded-full text-[#474556] hover:text-[#3814d4] hover:bg-[#f1ebff] transition-all relative active:scale-95 cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center rounded-full text-neutral-600 hover:text-black hover:bg-black/5 transition-all relative active:scale-95 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[22px]">notifications</span>
             {notificationCount > 0 && (
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#e40468] ring-2 ring-white animate-pulse"></span>
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#ff7a00] ring-2 ring-white animate-pulse"></span>
             )}
           </button>
 
@@ -73,12 +71,19 @@ export function Header({
           <button
             onClick={onOpenProfile}
             aria-label="Student Profile"
-            className="w-10 h-10 flex items-center justify-center rounded-full hover:ring-2 hover:ring-[#3814d4] transition-all cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:ring-2 hover:ring-[#ff7a00] transition-all cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#3814d4] to-[#ffba20] p-0.5 shadow-sm">
-              <div className="w-full h-full rounded-full bg-[#1c163b] flex items-center justify-center text-white font-extrabold text-[11px]">
-                ME
-              </div>
+            <div className="relative">
+              <img
+                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80"
+                alt="Profile Avatar"
+                className="w-8 h-8 rounded-full object-cover border border-[#ff7a00]/80 shadow-sm"
+                onError={(e) => {
+                  e.currentTarget.onerror = null
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=120&auto=format&fit=crop&q=80'
+                }}
+              />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#00d26a] ring-1 ring-white"></span>
             </div>
           </button>
         </div>

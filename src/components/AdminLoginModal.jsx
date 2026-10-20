@@ -27,40 +27,40 @@ export function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
-      <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl border border-[#e6deff]/60 flex flex-col gap-4 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
+      <div className="w-full max-w-sm bg-[#1c1c1e] border border-white/[0.08] text-white rounded-[28px] p-6 shadow-2xl flex flex-col gap-4 relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f1ebff] text-[#474556] flex items-center justify-center hover:bg-[#e6deff] cursor-pointer"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#2c2c2e] text-white/70 hover:text-white flex items-center justify-center border border-white/5 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[18px]">close</span>
         </button>
 
         {/* Security badge header */}
         <div className="flex items-center gap-3 pt-1">
-          <div className="w-12 h-12 rounded-2xl bg-[#1c163b] text-[#ffdea8] flex items-center justify-center shrink-0 shadow-md">
+          <div className="w-12 h-12 rounded-2xl bg-[#2c2c2e] border border-white/10 text-[#ff7a00] flex items-center justify-center shrink-0 shadow-md">
             <span className="material-symbols-outlined text-[26px]">admin_panel_settings</span>
           </div>
           <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#e40468] bg-[#ffd9df] px-1.5 py-0.2 rounded">
+            <span className="text-[10px] font-black uppercase tracking-wider text-[#ff7a00] bg-[#ff7a00]/20 px-2 py-0.5 rounded-full border border-[#ff7a00]/30">
               RESTRICTED PORTAL
             </span>
-            <h3 className="text-[17px] font-black text-[#1c163b] leading-tight mt-0.5">
+            <h3 className="text-[17px] font-black text-white leading-tight mt-1">
               Studio Command Login
             </h3>
-            <p className="text-[11px] text-[#474556]">MESCE FM 108.1 Staff & RJs</p>
+            <p className="text-[11px] text-white/60">MESCE FM 108.1 Staff & RJs</p>
           </div>
         </div>
 
         {errorMsg && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-semibold">
+          <div className="p-3 bg-red-950/40 border border-red-500/20 text-red-300 rounded-xl text-xs font-semibold">
             {errorMsg}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="flex flex-col gap-3">
           <div>
-            <label className="text-[11px] font-bold text-[#474556] block mb-1">
+            <label className="text-[11px] font-bold text-white/60 block mb-1">
               Station RJ / Faculty Email
             </label>
             <input
@@ -68,12 +68,12 @@ export function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
               required
               value={adminEmail}
               onChange={(e) => setAdminEmail(e.target.value)}
-              className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[13px] text-[#1c163b] font-medium outline-none focus:border-[#3814d4]"
+              className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[13px] text-white font-medium outline-none focus:border-[#ff7a00]"
             />
           </div>
 
           <div>
-            <label className="text-[11px] font-bold text-[#474556] block mb-1">
+            <label className="text-[11px] font-bold text-white/60 block mb-1">
               Studio Master Passcode
             </label>
             <input
@@ -82,13 +82,13 @@ export function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
               placeholder="Enter passcode (Demo: mesce108)"
               value={adminPassword}
               onChange={(e) => setAdminPassword(e.target.value)}
-              className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[13px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+              className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[13px] text-white outline-none focus:border-[#ff7a00]"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-[#3814d4] hover:bg-[#2400a0] text-white font-black text-[13px] rounded-2xl shadow-md transition-all cursor-pointer active:scale-98 mt-1"
+            className="w-full py-3 bg-[#ff7a00] hover:bg-[#ff8c1a] text-black font-black text-[13px] rounded-2xl shadow-md transition-all cursor-pointer active:scale-98 mt-1"
           >
             Authenticate & Open Studio Desk
           </button>
@@ -96,13 +96,13 @@ export function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
           <button
             type="button"
             onClick={handleQuickDemoLogin}
-            className="w-full py-2 bg-[#f1ebff] hover:bg-[#e6deff] text-[#3814d4] font-bold text-[11px] rounded-xl transition-colors cursor-pointer"
+            className="w-full py-2 bg-[#2c2c2e] hover:bg-[#38383a] text-white/90 font-bold text-[11px] rounded-xl border border-white/5 transition-colors cursor-pointer"
           >
             ⚡ One-Click Station Demo Login (Passkey: mesce108)
           </button>
         </form>
 
-        <p className="text-[10px] text-center text-[#777587]">
+        <p className="text-[10px] text-center text-white/40">
           Protected by Firebase Authentication & Campus Security Rules
         </p>
       </div>

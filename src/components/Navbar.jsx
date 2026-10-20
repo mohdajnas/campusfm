@@ -12,7 +12,7 @@ export function Navbar({ activeScreen, setActiveScreen }) {
   if (activeScreen === 'admin') return null
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 pb-safe bg-[#fdf8ff]/95 backdrop-blur-xl border-t border-[#e6deff]/60 shadow-[0_-4px_24px_rgba(36,0,160,0.06)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 pb-safe bg-white/95 backdrop-blur-xl border-t border-black/[0.06] shadow-[0_-4px_24px_rgba(0,0,0,0.06)]">
       <div className="max-w-md mx-auto flex items-center justify-around h-16 px-2">
         {tabs.map((tab) => {
           const isActive = activeScreen === tab.id
@@ -22,8 +22,8 @@ export function Navbar({ activeScreen, setActiveScreen }) {
               onClick={() => setActiveScreen(tab.id)}
               className={`flex flex-col items-center justify-center w-18 h-12 transition-all relative group cursor-pointer ${
                 isActive
-                  ? 'text-[#3814d4] font-extrabold'
-                  : 'text-[#474556] hover:text-[#3814d4] font-medium'
+                  ? 'text-[#ff7a00] font-extrabold'
+                  : 'text-neutral-400 hover:text-neutral-900 font-medium'
               }`}
             >
               <div className="relative">
@@ -40,7 +40,7 @@ export function Navbar({ activeScreen, setActiveScreen }) {
                   {tab.icon}
                 </span>
                 {isActive && (
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#3814d4] rounded-full"></span>
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#ff7a00] rounded-full shadow-[0_0_6px_#ff7a00]"></span>
                 )}
               </div>
               <span className="text-[10px] mt-0.5 tracking-tight font-bold">{tab.label}</span>

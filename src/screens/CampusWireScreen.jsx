@@ -184,12 +184,12 @@ export function CampusWireScreen({
         {/* Filter Reset pill when filtered */}
         {filterTab !== 'all' && (
           <div className="flex items-center justify-between mt-2.5 px-1 text-[11px]">
-            <span className="text-[#474556] font-semibold">
-              Showing <span className="font-extrabold text-[#1c163b]">{categories.find((c) => c.id === filterTab)?.title}</span>
+            <span className="text-white/60 font-semibold">
+              Showing <span className="font-extrabold text-white">{categories.find((c) => c.id === filterTab)?.title}</span>
             </span>
             <button
               onClick={() => setFilterTab('all')}
-              className="text-[#3814d4] font-extrabold hover:underline cursor-pointer flex items-center gap-0.5"
+              className="text-[#ff7a00] font-extrabold hover:underline cursor-pointer flex items-center gap-0.5"
             >
               <span>Reset filter</span>
               <span className="material-symbols-outlined text-[14px]">close</span>
@@ -201,19 +201,19 @@ export function CampusWireScreen({
       {/* Emergency Official Alert (if active) */}
       {alert?.active && (filterTab === 'all' || filterTab === 'events') && (
         <div className="px-4 mt-2">
-          <div className="bg-[#fff0f4] border border-[#ffb1c1] rounded-2xl p-4 flex items-start gap-3 shadow-sm">
-            <span className="material-symbols-outlined text-[#e40468] text-[24px] shrink-0 mt-0.5 animate-pulse">
+          <div className="bg-[#242426] border border-[#ff3b30]/40 rounded-[22px] p-4 flex items-start gap-3 shadow-md">
+            <span className="material-symbols-outlined text-[#ff3b30] text-[24px] shrink-0 mt-0.5 animate-pulse">
               emergency_home
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between">
-                <span className="text-[9px] font-black uppercase tracking-wider bg-[#e40468] text-white px-2 py-0.5 rounded-full">
+                <span className="text-[9px] font-black uppercase tracking-wider bg-[#ff3b30] text-white px-2 py-0.5 rounded-full">
                   URGENT CAMPUS NOTICE
                 </span>
-                <span className="text-[10px] text-[#90003e] font-bold">{alert.timestamp}</span>
+                <span className="text-[10px] text-white/60 font-bold">{alert.timestamp}</span>
               </div>
-              <h4 className="text-[14px] font-extrabold text-[#3f0017] mt-1">{alert.title}</h4>
-              <p className="text-[12px] text-[#7a1c38] mt-0.5 leading-snug">{alert.details}</p>
+              <h4 className="text-[14px] font-extrabold text-white mt-1">{alert.title}</h4>
+              <p className="text-[12px] text-white/80 mt-0.5 leading-snug">{alert.details}</p>
             </div>
           </div>
         </div>
@@ -224,12 +224,12 @@ export function CampusWireScreen({
         <div className="px-4 mt-5 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-[16px] font-extrabold text-[#1c163b]">Festivals & Club Events</h3>
-              <p className="text-[11px] text-[#474556]">Official calendar of MES College of Engineering</p>
+              <h3 className="text-[16px] font-extrabold text-neutral-900">Festivals & Club Events</h3>
+              <p className="text-[11px] text-neutral-500">Official calendar of MES College of Engineering</p>
             </div>
             <button
               onClick={() => setIsEventModalOpen(true)}
-              className="px-3 py-1.5 bg-[#3814d4] text-white text-[11px] font-extrabold rounded-full shadow-sm flex items-center gap-1 hover:bg-[#2400a0] transition-colors cursor-pointer"
+              className="px-3 py-1.5 bg-[#ff7a00] hover:bg-[#ff8c1a] text-black text-[11px] font-extrabold rounded-full shadow-md flex items-center gap-1 transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-[15px]">add</span>
               <span>Submit Event</span>
@@ -238,52 +238,52 @@ export function CampusWireScreen({
 
           {/* Success Toast */}
           {eventSubmitted && (
-            <div className="bg-green-50 border border-green-200 rounded-2xl p-3 flex items-center gap-2.5 animate-fadeIn">
-              <span className="material-symbols-outlined text-green-600 text-[20px]">check_circle</span>
+            <div className="bg-[#242426] border border-[#00d26a]/40 rounded-2xl p-3 flex items-center gap-2.5 animate-fadeIn">
+              <span className="material-symbols-outlined text-[#00d26a] text-[20px]">check_circle</span>
               <div>
-                <p className="text-[12px] font-bold text-green-800">Event submitted successfully!</p>
-                <p className="text-[10px] text-green-600">Your event will appear after admin approval.</p>
+                <p className="text-[12px] font-bold text-white">Event submitted successfully!</p>
+                <p className="text-[10px] text-white/60">Your event will appear after admin approval.</p>
               </div>
             </div>
           )}
 
-          {/* Pending Events by this student (with visual indicator) */}
+          {/* Pending Events by this student */}
           {pendingEvents.length > 0 && (
             <div className="flex flex-col gap-2">
-              <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
+              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
                 <span className="material-symbols-outlined text-[14px]">hourglass_top</span>
                 Awaiting Admin Approval ({pendingEvents.length})
               </span>
               {pendingEvents.map((ev) => (
                 <div
                   key={ev.id}
-                  className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/60 shadow-sm flex flex-col gap-2 relative overflow-hidden"
+                  className="p-3.5 rounded-[22px] bg-[#242426] border border-amber-500/30 shadow-md flex flex-col gap-2 relative overflow-hidden"
                 >
                   <div className="absolute top-0 left-0 w-1 h-full bg-amber-400 rounded-r-full" />
                   <div className="flex items-start justify-between gap-2 pl-2">
                     <div>
-                      <span className="text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-amber-500 text-white">
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-amber-500 text-black">
                         PENDING REVIEW
                       </span>
-                      <h4 className="text-[14px] font-black text-[#1c163b] mt-1 leading-snug">
+                      <h4 className="text-[14px] font-black text-white mt-1 leading-snug">
                         {ev.title}
                       </h4>
-                      <p className="text-[11px] text-amber-700 font-bold mt-0.5">{ev.club}</p>
+                      <p className="text-[11px] text-amber-400 font-bold mt-0.5">{ev.club}</p>
                     </div>
                     <span className="material-symbols-outlined text-amber-400 text-[20px] animate-pulse">
                       pending
                     </span>
                   </div>
                   {ev.desc && (
-                    <p className="text-[11px] text-[#474556] leading-relaxed pl-2">{ev.desc}</p>
+                    <p className="text-[11px] text-white/70 leading-relaxed pl-2">{ev.desc}</p>
                   )}
-                  <div className="bg-amber-100/60 p-2 rounded-xl flex items-center justify-between text-[10px] font-bold text-amber-800 ml-2">
+                  <div className="bg-[#1c1c1e] p-2 rounded-xl flex items-center justify-between text-[10px] font-bold text-white/80 ml-2 border border-white/5">
                     <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[14px]">calendar_month</span>
+                      <span className="material-symbols-outlined text-[14px] text-[#ff7a00]">calendar_month</span>
                       <span>{ev.date}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[14px]">person</span>
+                      <span className="material-symbols-outlined text-[14px] text-white/60">person</span>
                       <span>{ev.submittedBy}</span>
                     </div>
                   </div>
@@ -296,7 +296,7 @@ export function CampusWireScreen({
             {approvedEvents.map((ev) => (
               <div
                 key={ev.id}
-                className="p-4 rounded-2xl bg-white border border-[#e6deff]/60 shadow-sm flex flex-col gap-2.5"
+                className="p-4 rounded-[24px] bg-[#1c1c1e] border border-white/[0.08] shadow-md flex flex-col gap-2.5"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
@@ -305,24 +305,24 @@ export function CampusWireScreen({
                     >
                       {ev.badge}
                     </span>
-                    <h4 className="text-[15px] font-black text-[#1c163b] mt-1 leading-snug">
+                    <h4 className="text-[15px] font-black text-white mt-1 leading-snug">
                       {ev.title}
                     </h4>
-                    <p className="text-[11px] text-[#3814d4] font-bold mt-0.5">{ev.club}</p>
+                    <p className="text-[11px] text-[#ff7a00] font-bold mt-0.5">{ev.club}</p>
                   </div>
                 </div>
 
-                <p className="text-[12px] text-[#474556] leading-relaxed">{ev.desc}</p>
+                <p className="text-[12px] text-white/70 leading-relaxed">{ev.desc}</p>
 
-                <div className="bg-[#f7f1ff] p-2.5 rounded-xl flex items-center justify-between text-[11px] font-bold text-[#1c163b]">
+                <div className="bg-[#242426] border border-white/5 p-2.5 rounded-xl flex items-center justify-between text-[11px] font-bold text-white">
                   <div className="flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[16px] text-[#3814d4]">
+                    <span className="material-symbols-outlined text-[16px] text-[#ff7a00]">
                       calendar_month
                     </span>
                     <span>{ev.date}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[#474556]">
-                    <span className="material-symbols-outlined text-[16px] text-[#e40468]">
+                  <div className="flex items-center gap-1.5 text-white/70">
+                    <span className="material-symbols-outlined text-[16px] text-[#ff7a00]">
                       location_on
                     </span>
                     <span className="truncate max-w-[150px]">{ev.venue}</span>
@@ -339,12 +339,12 @@ export function CampusWireScreen({
         <div className="px-4 mt-6 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-[16px] font-extrabold text-[#1c163b]">Campus Lost & Found</h3>
-              <p className="text-[11px] text-[#474556]">Broadcasting lost items on MESCE FM 108.1</p>
+              <h3 className="text-[16px] font-extrabold text-neutral-900">Campus Lost & Found</h3>
+              <p className="text-[11px] text-neutral-500">Broadcasting lost items on MESCE FM 108.1</p>
             </div>
             <button
               onClick={() => setIsLostFoundModalOpen(true)}
-              className="px-3 py-1.5 bg-[#3814d4] text-white text-[11px] font-extrabold rounded-full shadow-sm flex items-center gap-1 hover:bg-[#2400a0] transition-colors cursor-pointer"
+              className="px-3 py-1.5 bg-neutral-100 hover:bg-[#ff7a00] hover:text-black border border-neutral-200 text-neutral-800 text-[11px] font-extrabold rounded-full shadow-sm flex items-center gap-1 transition-all cursor-pointer"
             >
               <span className="material-symbols-outlined text-[15px]">add</span>
               <span>Report Item</span>
@@ -355,32 +355,32 @@ export function CampusWireScreen({
             {lostAndFound.map((lf) => (
               <div
                 key={lf.id}
-                className={`p-3 rounded-2xl border flex items-center justify-between gap-3 ${
+                className={`p-3 rounded-[22px] border flex items-center justify-between gap-3 ${
                   lf.claimed
-                    ? 'bg-[#f8f8fa] border-[#e6deff]/40 opacity-70'
-                    : 'bg-white border-[#e6deff]/60 shadow-sm'
+                    ? 'bg-[#1c1c1e]/60 border-white/5 opacity-60'
+                    : 'bg-[#1c1c1e] border-white/[0.08] shadow-md'
                 }`}
               >
-                <div className="w-10 h-10 rounded-xl bg-[#f1ebff] text-[#3814d4] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-[#2c2c2e] text-[#ff7a00] border border-white/5 flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-[20px]">
                     {lf.claimed ? 'check_circle' : 'search'}
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-[13px] font-extrabold text-[#1c163b] truncate">{lf.item}</h4>
+                    <h4 className="text-[13px] font-extrabold text-white truncate">{lf.item}</h4>
                     {lf.claimed ? (
-                      <span className="px-1.5 py-0.2 rounded bg-green-100 text-green-700 text-[9px] font-bold">
+                      <span className="px-1.5 py-0.2 rounded bg-green-500/20 text-green-400 text-[9px] font-bold">
                         Claimed
                       </span>
                     ) : (
-                      <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 text-[9px] font-bold">
+                      <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[9px] font-bold">
                         Unclaimed
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-[#474556] truncate mt-0.5">{lf.location}</p>
-                  <p className="text-[10px] text-[#3814d4] font-semibold mt-0.5">
+                  <p className="text-[11px] text-white/60 truncate mt-0.5">{lf.location}</p>
+                  <p className="text-[10px] text-[#ff7a00] font-semibold mt-0.5">
                     Contact: {lf.contact} • {lf.date}
                   </p>
                 </div>
@@ -395,10 +395,10 @@ export function CampusWireScreen({
         <div className="px-4 mt-6 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-[16px] font-extrabold text-[#1c163b]">Student Opportunities</h3>
-              <p className="text-[11px] text-[#474556]">Internships, hackathons & student challenges</p>
+              <h3 className="text-[16px] font-extrabold text-neutral-900">Student Opportunities</h3>
+              <p className="text-[11px] text-neutral-500">Internships, hackathons & student challenges</p>
             </div>
-            <span className="material-symbols-outlined text-[#e40468] text-[20px]">
+            <span className="material-symbols-outlined text-[#ff7a00] text-[20px]">
               work
             </span>
           </div>
@@ -407,14 +407,14 @@ export function CampusWireScreen({
             {opportunities.map((opp) => (
               <div
                 key={opp.id}
-                className="p-4 rounded-2xl bg-white border border-[#e6deff]/60 shadow-sm flex flex-col gap-2"
+                className="p-4 rounded-[24px] bg-[#1c1c1e] border border-white/[0.08] shadow-md flex flex-col gap-2"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h4 className="text-[14px] font-black text-[#1c163b]">{opp.title}</h4>
-                    <p className="text-[11px] text-[#3814d4] font-bold mt-0.5">{opp.org}</p>
+                    <h4 className="text-[14px] font-black text-white">{opp.title}</h4>
+                    <p className="text-[11px] text-[#ff7a00] font-bold mt-0.5">{opp.org}</p>
                   </div>
-                  <span className="text-[11px] font-black text-[#e40468] bg-[#ffd9df] px-2 py-0.5 rounded-full whitespace-nowrap">
+                  <span className="text-[11px] font-black text-white bg-[#2c2c2e] border border-white/10 px-2 py-0.5 rounded-full whitespace-nowrap">
                     {opp.stipend}
                   </span>
                 </div>
@@ -423,16 +423,16 @@ export function CampusWireScreen({
                   {opp.tags.map((t, idx) => (
                     <span
                       key={idx}
-                      className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#f1ebff] text-[#474556]"
+                      className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#242426] text-white/70 border border-white/5"
                     >
                       {t}
                     </span>
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-[#f1ebff] text-[11px]">
-                  <span className="text-[#777587] font-semibold">Deadline: {opp.deadline}</span>
-                  <span className="text-[#3814d4] font-black flex items-center">
+                <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[11px]">
+                  <span className="text-white/40 font-semibold">Deadline: {opp.deadline}</span>
+                  <span className="text-[#ff7a00] font-black flex items-center">
                     {opp.link} <span className="material-symbols-outlined text-[14px]">open_in_new</span>
                   </span>
                 </div>
@@ -444,63 +444,63 @@ export function CampusWireScreen({
 
       {/* Modal: Report Lost or Found Item */}
       {isLostFoundModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl flex flex-col gap-3 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-sm bg-[#1c1c1e] text-white border border-white/[0.08] rounded-[28px] p-6 shadow-2xl flex flex-col gap-3 relative">
             <button
               onClick={() => setIsLostFoundModalOpen(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f1ebff] text-[#474556] flex items-center justify-center hover:bg-[#e6deff]"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#2c2c2e] text-white/70 hover:text-white flex items-center justify-center border border-white/5"
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
 
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-2xl bg-[#3814d4] text-white flex items-center justify-center">
+              <div className="w-10 h-10 rounded-2xl bg-[#2c2c2e] border border-white/10 text-[#ff7a00] flex items-center justify-center">
                 <span className="material-symbols-outlined text-[22px]">find_in_page</span>
               </div>
               <div>
-                <h3 className="text-[17px] font-black text-[#1c163b]">Report Item</h3>
-                <p className="text-[11px] text-[#474556]">Will be broadcasted on campus radio</p>
+                <h3 className="text-[17px] font-black text-white">Report Item</h3>
+                <p className="text-[11px] text-white/60">Will be broadcasted on campus radio</p>
               </div>
             </div>
 
             <form onSubmit={handleReportLostFound} className="flex flex-col gap-2.5 mt-1">
               <div>
-                <label className="text-[11px] font-bold text-[#474556] block mb-1">Item Name & Brand *</label>
+                <label className="text-[11px] font-bold text-white/60 block mb-1">Item Name & Brand *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Casio fx-991EX Calculator / Blue Umbrella"
                   value={lfItem}
                   onChange={(e) => setLfItem(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-[#474556] block mb-1">Location Found / Lost</label>
+                <label className="text-[11px] font-bold text-white/60 block mb-1">Location Found / Lost</label>
                 <input
                   type="text"
                   placeholder="e.g. Mech Seminar Hall / Central Library 2nd Floor"
                   value={lfLocation}
                   onChange={(e) => setLfLocation(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-[#474556] block mb-1">Contact / Handover Location</label>
+                <label className="text-[11px] font-bold text-white/60 block mb-1">Contact / Handover Location</label>
                 <input
                   type="text"
                   placeholder="e.g. Handed over to Security Gate / My Phone"
                   value={lfContact}
                   onChange={(e) => setLfContact(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-2xl bg-[#3814d4] hover:bg-[#2400a0] text-white font-extrabold text-[13px] shadow-md transition-all cursor-pointer mt-1 active:scale-98"
+                className="w-full py-3 rounded-2xl bg-[#ff7a00] hover:bg-[#ff8c1a] text-black font-extrabold text-[13px] shadow-md transition-all cursor-pointer mt-1 active:scale-98"
               >
                 Post to Campus Wire & Radio Desk
               </button>
@@ -511,11 +511,11 @@ export function CampusWireScreen({
 
       {/* Modal: Submit Event for Admin Approval */}
       {isEventModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl flex flex-col gap-3 relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-sm bg-[#1c1c1e] text-white border border-white/[0.08] rounded-[28px] p-6 shadow-2xl flex flex-col gap-3 relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setIsEventModalOpen(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f1ebff] text-[#474556] flex items-center justify-center hover:bg-[#e6deff] z-10"
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#2c2c2e] text-white/70 hover:text-white flex items-center justify-center border border-white/5 z-10"
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
@@ -525,91 +525,91 @@ export function CampusWireScreen({
                 <span className="material-symbols-outlined text-[22px]">event</span>
               </div>
               <div>
-                <h3 className="text-[17px] font-black text-[#1c163b]">Submit an Event</h3>
-                <p className="text-[11px] text-[#474556]">Needs admin approval before publishing</p>
+                <h3 className="text-[17px] font-black text-white">Submit an Event</h3>
+                <p className="text-[11px] text-white/60">Needs admin approval before publishing</p>
               </div>
             </div>
 
             {/* Info Banner */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 flex items-start gap-2">
-              <span className="material-symbols-outlined text-blue-500 text-[16px] mt-0.5">info</span>
-              <p className="text-[10px] text-blue-700 leading-snug">
+            <div className="bg-[#242426] border border-white/10 rounded-xl p-2.5 flex items-start gap-2">
+              <span className="material-symbols-outlined text-[#ff7a00] text-[16px] mt-0.5">info</span>
+              <p className="text-[10px] text-white/80 leading-snug">
                 Your event will be reviewed by the MESCE FM admin team. Once approved, it'll appear on the Campus Wire for all students.
               </p>
             </div>
 
             <form onSubmit={handleSubmitEvent} className="flex flex-col gap-2.5 mt-1">
               <div>
-                <label className="text-[11px] font-bold text-[#474556] block mb-1">Event Title *</label>
+                <label className="text-[11px] font-bold text-white/60 block mb-1">Event Title *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. TechFest 2026 / Coding Challenge / Art Exhibition"
                   value={evTitle}
                   onChange={(e) => setEvTitle(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] font-bold text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] font-bold text-white outline-none focus:border-[#ff7a00]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[11px] font-bold text-[#474556] block mb-1">Club / Society</label>
+                  <label className="text-[11px] font-bold text-white/60 block mb-1">Club / Society</label>
                   <input
                     type="text"
                     placeholder="e.g. IEEE / Arts Club"
                     value={evClub}
                     onChange={(e) => setEvClub(e.target.value)}
-                    className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                    className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-[#474556] block mb-1">Date(s)</label>
+                  <label className="text-[11px] font-bold text-white/60 block mb-1">Date(s)</label>
                   <input
                     type="text"
                     placeholder="e.g. Nov 15, 2026"
                     value={evDate}
                     onChange={(e) => setEvDate(e.target.value)}
-                    className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                    className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-[#474556] block mb-1">Venue</label>
+                <label className="text-[11px] font-bold text-white/60 block mb-1">Venue</label>
                 <input
                   type="text"
                   placeholder="e.g. Main Auditorium / Seminar Hall"
                   value={evVenue}
                   onChange={(e) => setEvVenue(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-[#474556] block mb-1">Description</label>
+                <label className="text-[11px] font-bold text-white/60 block mb-1">Description</label>
                 <textarea
                   rows="2"
                   placeholder="Tell us about the event, competitions, prizes, registration..."
                   value={evDesc}
                   onChange={(e) => setEvDesc(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl p-2.5 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-full bg-[#242426] border border-white/10 rounded-xl p-2.5 text-[12px] text-white outline-none focus:border-[#ff7a00]"
                 ></textarea>
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-[#474556] block mb-1">Your Name</label>
+                <label className="text-[11px] font-bold text-white/60 block mb-1">Your Name</label>
                 <input
                   type="text"
                   placeholder="e.g. Arun K. (ECE S6) / IEEE Secretary"
                   value={evSubmitter}
                   onChange={(e) => setEvSubmitter(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#3814d4] to-[#6e38d4] hover:from-[#2400a0] hover:to-[#5520b0] text-white font-extrabold text-[13px] shadow-md transition-all cursor-pointer mt-1 active:scale-98 flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-2xl bg-[#ff7a00] hover:bg-[#ff8c1a] text-black font-extrabold text-[13px] shadow-md transition-all cursor-pointer mt-1 active:scale-98 flex items-center justify-center gap-2"
               >
                 <span className="material-symbols-outlined text-[18px]">send</span>
                 Submit for Admin Review

@@ -181,11 +181,42 @@ export const PODCASTS = [
 ]
 
 export const LIVE_CHAT_MESSAGES = [
-  { id: 'msg-1', sender: 'Rahul (Mech S5)', text: 'Canteen biriyani is actually fire today, big salute to the mess team! 🔥', time: '12:45 PM', avatar: '👨‍🎓' },
-  { id: 'msg-2', sender: 'Sona (Civil S3)', text: 'Can RJ Farhan play the new acoustic track by The Campus Octaves? Big fan! ❤️', time: '12:46 PM', avatar: '👩‍🎓' },
-  { id: 'msg-3', sender: 'Aadil (CSE S7)', text: 'Placement drive mock interviews in EEE lab at 2 PM. Best of luck all! 💼', time: '12:48 PM', avatar: '💻' },
-  { id: 'msg-4', sender: 'Meera (Arch S1)', text: 'Happy birthday to Sneha in drafting lab! Treat pleaseee 🎂🎉', time: '12:51 PM', avatar: '🎨' },
-  { id: 'msg-5', sender: 'RJ Farhan (Host)', text: 'Dedicating this next acoustic tune to the drafting lab crew! Turn it up 📻✨', time: '12:53 PM', avatar: '🎙️', isHost: true },
+  {
+    id: 'msg-1',
+    sender: 'Rahul (Mech S5)',
+    text: 'Canteen biriyani is actually fire today, big salute to the mess team! 🔥',
+    time: '12:45 PM',
+    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'msg-2',
+    sender: 'Sona (Civil S3)',
+    text: 'Can RJ Farhan play the new acoustic track by The Campus Octaves? Big fan! ❤️',
+    time: '12:46 PM',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'msg-3',
+    sender: 'Aadil (CSE S7)',
+    text: 'Placement drive mock interviews in EEE lab at 2 PM. Best of luck all! 💼',
+    time: '12:48 PM',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'msg-4',
+    sender: 'Meera (Arch S1)',
+    text: 'Happy birthday to Sneha in drafting lab! Treat pleaseee 🎂🎉',
+    time: '12:51 PM',
+    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'msg-5',
+    sender: 'RJ Farhan (Host)',
+    text: 'Dedicating this next acoustic tune to the drafting lab crew! Turn it up 📻✨',
+    time: '12:53 PM',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    isHost: true,
+  },
 ]
 
 export const SONG_REQUESTS = [
@@ -206,7 +237,7 @@ export const SONG_REQUESTS = [
     id: 'req-2',
     songTitle: 'Cherathukal (From "Kumbalangi Nights")',
     artist: 'Sushin Shyam & Sithara Krishnakumar',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/7c/4f/f5/7c4ff558-7557-ca59-a212-be007a829280/cover.jpg/600x600bb.jpg',
+    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/ff/e5/09/ffe50919-e001-3e56-bc3f-09a4ce474175/8904337228118.jpg/600x600bb.jpg',
     streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/4a/12/58/4a125867-248d-cefe-7917-862d2579dfd9/mzaf_16259021469113642777.plus.aac.p.m4a',
     duration: 30,
     requester: 'Fathima (Biotech S4)',
@@ -219,7 +250,7 @@ export const SONG_REQUESTS = [
     id: 'req-3',
     songTitle: 'Yellow',
     artist: 'Coldplay',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1e/8a/20/1e8a2095-2dfb-d0ae-4357-193740e535e6/cover.jpg/600x600bb.jpg',
+    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/f5/93/8c/f5938c49-964c-31d1-4b33-78b634f71fb7/190295978075.jpg/600x600bb.jpg',
     streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/bf/25/60/bf25603b-d5a2-3f1a-b0df-2ff6663f738c/mzaf_14078516027137812169.plus.aac.p.m4a',
     duration: 30,
     requester: 'Anonymous Listener',

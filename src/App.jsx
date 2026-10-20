@@ -500,7 +500,7 @@ export default function App() {
   }
 
   return (
-    <div className="bg-[#fdf8ff] text-[#1c163b] min-h-screen flex flex-col font-sans relative selection:bg-[#3814d4] selection:text-white">
+    <div className="bg-white text-neutral-900 min-h-screen flex flex-col font-sans relative selection:bg-[#ff7a00] selection:text-black">
       {/* Top Header (Clean student view without admin buttons) */}
       <Header
         currentScreen={activeScreen}
@@ -523,6 +523,10 @@ export default function App() {
             onPlayPodcast={handlePlayPodcast}
             onOpenAuditionModal={() => setIsAuditionModalOpen(true)}
             onOpenRequestModal={() => setActiveScreen('community')}
+            onSkipNext={handleSkipNext}
+            onSkipPrev={handleSkipPrev}
+            currentTime={currentTime}
+            duration={duration}
           />
         )}
 

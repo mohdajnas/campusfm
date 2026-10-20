@@ -8,29 +8,36 @@ export function ProfileModal({ isOpen, onClose, onOpenAdminLogin }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-      <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl border border-[#e6deff]/60 flex flex-col gap-4 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
+      <div className="w-full max-w-sm bg-[#1c1c1e] border border-white/[0.08] text-white rounded-[28px] p-6 shadow-2xl flex flex-col gap-4 relative">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-extrabold text-[#1c163b]">Student Listener Profile</h3>
+          <h3 className="text-lg font-extrabold text-white">Student Listener Profile</h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#f1ebff] text-[#474556] flex items-center justify-center hover:bg-[#e6deff] cursor-pointer"
+            className="w-8 h-8 rounded-full bg-[#2c2c2e] text-white/70 hover:text-white flex items-center justify-center border border-white/5 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>
 
         {/* Student Card */}
-        <div className="p-4 rounded-2xl bg-gradient-to-tr from-[#3814d4] to-[#2400a0] text-white flex items-center gap-3.5 shadow-md">
-          <div className="w-13 h-13 rounded-full bg-gradient-to-tr from-[#ffdea8] to-[#ff2a7a] p-0.5 shadow">
-            <div className="w-full h-full rounded-full bg-[#1c163b] flex items-center justify-center text-white font-black text-sm">
-              ME
-            </div>
+        <div className="p-4 rounded-2xl bg-[#242426] border border-white/10 text-white flex items-center gap-3.5 shadow-md">
+          <div className="relative shrink-0">
+            <img
+              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80"
+              alt="Campus Listener"
+              className="w-13 h-13 rounded-full object-cover border-2 border-[#ff7a00] shadow-md"
+              onError={(e) => {
+                e.currentTarget.onerror = null
+                e.currentTarget.src = 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80'
+              }}
+            />
+            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#00d26a] ring-2 ring-[#242426]"></span>
           </div>
           <div>
             <h4 className="text-[16px] font-extrabold leading-tight">Campus Listener</h4>
-            <p className="text-[12px] text-[#c5c0ff] mt-0.5">MES College of Engineering</p>
-            <span className="inline-block px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-bold mt-1">
+            <p className="text-[12px] text-white/60 mt-0.5">MES College of Engineering</p>
+            <span className="inline-block px-2 py-0.5 rounded-full bg-[#ff7a00]/20 text-[#ff7a00] text-[10px] font-bold mt-1">
               STUDENT PASS
             </span>
           </div>
@@ -40,13 +47,13 @@ export function ProfileModal({ isOpen, onClose, onOpenAdminLogin }) {
         <div className="flex flex-col gap-3 py-1">
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-[13px] font-bold text-[#1c163b]">Campus HD Audio (320kbps)</span>
-              <span className="text-[11px] text-[#474556]">Studio master stream quality</span>
+              <span className="text-[13px] font-bold text-white">Campus HD Audio (320kbps)</span>
+              <span className="text-[11px] text-white/50">Studio master stream quality</span>
             </div>
             <button
               onClick={() => setHdAudio(!hdAudio)}
               className={`w-12 h-6.5 rounded-full transition-colors relative cursor-pointer ${
-                hdAudio ? 'bg-[#3814d4]' : 'bg-[#e6deff]'
+                hdAudio ? 'bg-[#ff7a00]' : 'bg-[#2c2c2e]'
               }`}
             >
               <span
@@ -59,13 +66,13 @@ export function ProfileModal({ isOpen, onClose, onOpenAdminLogin }) {
 
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-[13px] font-bold text-[#1c163b]">Stream on Campus Wi-Fi / 5G</span>
-              <span className="text-[11px] text-[#474556]">High bitrate playback allowed</span>
+              <span className="text-[13px] font-bold text-white">Stream on Campus Wi-Fi / 5G</span>
+              <span className="text-[11px] text-white/50">High bitrate playback allowed</span>
             </div>
             <button
               onClick={() => setCellularData(!cellularData)}
               className={`w-12 h-6.5 rounded-full transition-colors relative cursor-pointer ${
-                cellularData ? 'bg-[#3814d4]' : 'bg-[#e6deff]'
+                cellularData ? 'bg-[#ff7a00]' : 'bg-[#2c2c2e]'
               }`}
             >
               <span
@@ -78,13 +85,13 @@ export function ProfileModal({ isOpen, onClose, onOpenAdminLogin }) {
 
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-[13px] font-bold text-[#1c163b]">Offline Podcast Cache</span>
-              <span className="text-[11px] text-[#474556]">Buffer recent campus interviews</span>
+              <span className="text-[13px] font-bold text-white">Offline Podcast Cache</span>
+              <span className="text-[11px] text-white/50">Buffer recent campus interviews</span>
             </div>
             <button
               onClick={() => setOfflineSync(!offlineSync)}
               className={`w-12 h-6.5 rounded-full transition-colors relative cursor-pointer ${
-                offlineSync ? 'bg-[#3814d4]' : 'bg-[#e6deff]'
+                offlineSync ? 'bg-[#ff7a00]' : 'bg-[#2c2c2e]'
               }`}
             >
               <span
@@ -97,13 +104,13 @@ export function ProfileModal({ isOpen, onClose, onOpenAdminLogin }) {
         </div>
 
         {/* Discrete Station Staff / Faculty Link */}
-        <div className="pt-2 border-t border-[#f1ebff] flex flex-col gap-2">
+        <div className="pt-2 border-t border-white/5 flex flex-col gap-2">
           <button
             onClick={() => {
               onClose()
               if (onOpenAdminLogin) onOpenAdminLogin()
             }}
-            className="flex items-center justify-center gap-1.5 text-[11px] font-bold text-[#777587] hover:text-[#3814d4] transition-colors py-1 cursor-pointer"
+            className="flex items-center justify-center gap-1.5 text-[11px] font-bold text-white/60 hover:text-[#ff7a00] transition-colors py-1 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">lock</span>
             <span>Studio Staff & RJ Portal Login</span>
@@ -111,7 +118,7 @@ export function ProfileModal({ isOpen, onClose, onOpenAdminLogin }) {
 
           <button
             onClick={onClose}
-            className="w-full py-2.5 bg-[#f1ebff] hover:bg-[#e6deff] text-[#3814d4] font-bold text-xs rounded-2xl transition-colors cursor-pointer"
+            className="w-full py-2.5 bg-[#242426] hover:bg-[#2c2c2e] text-white font-bold text-xs rounded-2xl border border-white/5 transition-colors cursor-pointer"
           >
             Close Settings
           </button>

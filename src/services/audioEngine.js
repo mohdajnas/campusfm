@@ -1,5 +1,5 @@
 // Audio Engine: Full-Length Song Stream & Dynamic Queue Player for MESCE FM 108.1
-import { DEFAULT_MALAYALAM_PLAYLIST } from './musicService'
+import { DEFAULT_MALAYALAM_PLAYLIST, fetchBestMatch } from './musicService'
 import { youtubeAudio } from './youtubeAudio'
 
 class AudioEngine {
@@ -24,6 +24,8 @@ class AudioEngine {
     this.listeners = new Set()
     this.activeEngine = 'youtube' // 'youtube' | 'html5'
 
+    this.isAdvancing = false
+
     // Connect YouTube Audio events
     youtubeAudio.onStateChangeCallback = (isPlaying) => {
       this.isPlaying = isPlaying
@@ -41,6 +43,17 @@ class AudioEngine {
     youtubeAudio.onEndedCallback = () => {
       console.log('MESCE FM: Full song finished. Auto-advancing to next queued track...')
       this.advanceNext()
+    }
+
+    // Seamless fallback when YouTube blocks embedded playback (Error 150/101)
+    youtubeAudio.onErrorCallback = (errorCode, track) => {
+      const active = track || this.currentTrack
+      console.warn(`MESCE FM: YouTube restricted embed (code ${errorCode}) for "${active?.title || 'track'}". Switching seamlessly to direct stream...`)
+      if (active && active.streamUrl) {
+        this.fallbackToDirectStream(active)
+      } else {
+        this.safeAdvanceNext()
+      }
     }
 
     // HTML5 Audio Fallback listeners
@@ -76,7 +89,7 @@ class AudioEngine {
 
     this.audio.addEventListener('error', () => {
       if (this.activeEngine === 'html5') {
-        this.advanceNext()
+        this.handleStreamError(this.currentTrack)
       }
     })
   }
@@ -149,25 +162,81 @@ class AudioEngine {
     this.currentTime = 0
     this.duration = track.duration || 210
 
-    // Full-length YouTube audio playback (default)
-    if (track.youtubeId || track.searchQuery || !track.streamUrl) {
+    // Prefer high-fidelity direct audio stream for instantaneous, unblocked playback
+    if (track.streamUrl) {
+      this.fallbackToDirectStream(track)
+    } else if (track.youtubeId || track.searchQuery) {
       this.activeEngine = 'youtube'
       this.audio.pause()
       youtubeAudio.playTrack(track)
-    } else {
-      // Direct stream URL fallback
-      this.activeEngine = 'html5'
-      youtubeAudio.pause()
+      this.isPlaying = true
+      this.notify()
+    }
+  }
+
+  fallbackToDirectStream(track) {
+    if (!track) return
+    this.activeEngine = 'html5'
+    youtubeAudio.pause()
+    if (this.audio && track.streamUrl) {
       this.audio.src = track.streamUrl
-      this.audio.play().catch(() => {
-        // Fallback to YouTube if browser blocks direct stream
-        this.activeEngine = 'youtube'
-        youtubeAudio.playTrack(track)
-      })
+      this.audio.currentTime = 0
+      this.audio.volume = this.volume
+      const p = this.audio.play()
+      if (p !== undefined) {
+        p.then(() => {
+          this.isPlaying = true
+          this.notify()
+        }).catch((err) => {
+          console.warn('HTML5 direct stream play note:', err)
+          this.isPlaying = false
+          this.notify()
+        })
+      }
+    }
+  }
+
+  safeAdvanceNext() {
+    if (this.isAdvancing) return
+    this.isAdvancing = true
+    setTimeout(() => {
+      this.isAdvancing = false
+      this.advanceNext()
+    }, 2000)
+  }
+
+  async handleStreamError(track) {
+    if (!track) {
+      this.safeAdvanceNext()
+      return
     }
 
-    this.isPlaying = true
-    this.notify()
+    if (!track._freshRetried && track.title) {
+      track._freshRetried = true
+      try {
+        console.log(`MESCE FM: Stream link expired for "${track.title}". Resolving fresh live stream...`)
+        const fresh = await fetchBestMatch(track.title, track.artist)
+        if (fresh && fresh.streamUrl && fresh.streamUrl !== track.streamUrl) {
+          track.streamUrl = fresh.streamUrl
+          if (fresh.cover) track.cover = fresh.cover
+          this.fallbackToDirectStream(track)
+          return
+        }
+      } catch (err) {
+        console.warn('Dynamic stream resolution error:', err)
+      }
+    }
+
+    if (track.youtubeId || track.searchQuery) {
+      this.activeEngine = 'youtube'
+      this.audio.pause()
+      youtubeAudio.playTrack(track)
+      this.isPlaying = true
+      this.notify()
+      return
+    }
+
+    this.safeAdvanceNext()
   }
 
   togglePlay(overrideTrack) {
@@ -182,9 +251,15 @@ class AudioEngine {
           this.isPlaying = true
           this.notify()
         } else {
-          this.audio.play().catch(() => {
-            this.playTrack(this.currentTrack)
-          })
+          const p = this.audio.play()
+          if (p !== undefined) {
+            p.then(() => {
+              this.isPlaying = true
+              this.notify()
+            }).catch(() => {
+              this.playTrack(this.currentTrack)
+            })
+          }
         }
       } else {
         this.playTrack(this.defaultPlaylist[0])

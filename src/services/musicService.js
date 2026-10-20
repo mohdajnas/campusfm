@@ -24,6 +24,9 @@ export const POPULAR_MALAYALAM_YOUTUBE_MAP = {
   'navarasam': { id: '2Vv-BfVoq4g', duration: 290 },
 }
 
+export const DEFAULT_ALBUM_COVER =
+  'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80'
+
 export const DEFAULT_MALAYALAM_PLAYLIST = [
   {
     id: 'mesce-track-1',
@@ -41,8 +44,8 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Kuthanthram',
     artist: 'Sushin Shyam & Vedan',
     album: 'Manjummel Boys (Original Motion Picture Soundtrack)',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/55/e1/99/55e199e4-cb90-a352-78be-d67b2d56a350/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview112/v4/bf/f9/58/bff9580d-85fa-71a2-892f-fb8a76067b8a/mzaf_10574104996112948956.plus.aac.p.m4a',
+    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/70/f8/ae/70f8ae0d-aadf-6ec8-1a1c-2d83e26ff6dc/cover.jpg/600x600bb.jpg',
+    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/94/7f/aa/947faa2a-b558-2b1c-4ad0-1afc90352607/mzaf_2643013271292698405.plus.aac.p.m4a',
     youtubeId: 'YkVprVT04OA',
     duration: 185, // Full 3 mins 5 secs
     genre: 'Malayalam Indie Rap',
@@ -52,8 +55,8 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Cherathukal (From "Kumbalangi Nights")',
     artist: 'Sushin Shyam & Sithara Krishnakumar',
     album: 'Kumbalangi Nights',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/7c/4f/f5/7c4ff558-7557-ca59-a212-be007a829280/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/4a/12/58/4a125867-248d-cefe-7917-862d2579dfd9/mzaf_16259021469113642777.plus.aac.p.m4a',
+    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/ff/e5/09/ffe50919-e001-3e56-bc3f-09a4ce474175/8904337228118.jpg/600x600bb.jpg',
+    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/98/77/74/98777452-8183-7f08-1f68-df2a44b881bf/mzaf_16122855687462731475.plus.aac.p.m4a',
     youtubeId: 'JukNAg7bz6I',
     duration: 225, // Full 3 mins 45 secs
     genre: 'Acoustic Melody',
@@ -63,8 +66,8 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Manavaalan Thug (From "Thallumaala")',
     artist: 'Dabzee & S.A.',
     album: 'Thallumaala (Original Motion Picture Soundtrack)',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/eb/fa/6d/ebfa6d01-527e-8575-cf6e-69fca3705ee1/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/4c/7a/ff/4c7affd5-56fa-8e36-c0c1-be0b8478c575/mzaf_7182276532454655653.plus.aac.p.m4a',
+    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/cd/4a/c2/cd4ac279-7384-5ea1-7dd4-716f20d2c837/cover.jpg/600x600bb.jpg',
+    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/c0/a0/3c/c0a03c03-95fe-b8b8-5fef-8ed44a1a397e/mzaf_1993834899372910272.plus.aac.p.m4a',
     youtubeId: '_eWvDaztcjI',
     duration: 210, // Full 3 mins 30 secs
     genre: 'Campus Hype / Rap',
@@ -74,8 +77,8 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Darshana (From "Hridayam")',
     artist: 'Hesham Abdul Wahab & Darshana Rajendran',
     album: 'Hridayam (Original Soundtrack)',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/f4/6a/0c/f46a0cf2-adad-5850-faaa-7f0f666c8d7c/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/a7/40/3e/a7403ee3-c155-27a3-55be-5882e3895e34/mzaf_13503522204961559850.plus.aac.p.m4a',
+    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/69/26/34/6926341a-b85f-f853-de47-cb6fa81544aa/cover.jpg/600x600bb.jpg',
+    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/2b/71/38/2b71380d-0114-3845-c3a8-5d2cfb9abfae/mzaf_14430613370529957448.plus.aac.p.m4a',
     youtubeId: 'B-pNp0LUV2Y',
     duration: 250, // Full 4 mins 10 secs
     genre: 'College Romance / Indie',
@@ -85,8 +88,8 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Aadharanjali (From "Romancham")',
     artist: 'Sushin Shyam, Madhuvanthi Narayan & Vinayak Sasikumar',
     album: 'Romancham (Original Motion Picture Soundtrack)',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/eb/70/4e/eb704e6c-7e9b-43d5-2070-5bfaea7d4be1/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/05/aa/7c/05aa7cc4-cb64-325d-4f10-18e3be5b04aa/mzaf_12686851213426744837.plus.aac.p.m4a',
+    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/2f/d5/ed/2fd5edd0-82fa-1ffe-ac19-e3cadffc9531/197188225889.jpg/600x600bb.jpg',
+    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/55/95/3b/55953b56-368d-a2d2-c14d-54acb5783d7a/mzaf_12505579229243410349.plus.aac.p.m4a',
     youtubeId: 'yvPspB0p83E',
     duration: 200, // Full 3 mins 20 secs
     genre: 'Quirky Campus Beat',
@@ -96,8 +99,8 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Nada Nada',
     artist: 'Avial',
     album: 'Avial',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music/v4/a7/5b/9e/a75b9e02-9599-27aa-485a-063a86fc9cf3/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview/v4/80/7e/4e/807e4e0d-ec23-64a0-534a-85942f9fa2d9/mzaf_1648083839213567676.plus.aac.p.m4a',
+    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/19/c6/17/19c61763-956a-2189-7da8-e9ad92b1eab3/3616845678792.jpg/600x600bb.jpg',
+    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/c8/e1/6a/c8e16a60-c729-dca9-ffe7-42b277b8a0d1/mzaf_692850314876616037.plus.aac.p.m4a',
     youtubeId: '0yZ5x3bQoJg',
     duration: 255, // Full 4 mins 15 secs
     genre: 'Malayalam Rock / Cult Classic',
@@ -107,8 +110,8 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Fish Rock',
     artist: 'Thaikkudam Bridge',
     album: 'Navarasam',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/64/7b/d2/647bd2a0-be87-577d-7a0c-7b44357bc260/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/0c/33/c0/0c33c0be-4aa0-c971-8c43-b4eec12cb595/mzaf_16035043640209424888.plus.aac.p.m4a',
+    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/8f/eb/2a/8feb2a8d-c940-f18f-fa3e-f721adb07362/cover.jpg/600x600bb.jpg',
+    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/ad/63/48/ad6348be-b5da-9ffd-fa4d-63a3dd5558cd/mzaf_2646962926773142674.plus.aac.p.m4a',
     youtubeId: 'y4qHn-j3l4k',
     duration: 230, // Full 3 mins 50 secs
     genre: 'Prog Fusion / Fest Anthem',
@@ -118,8 +121,8 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Malare (From "Premam")',
     artist: 'Vijay Yesudas & Rajesh Murugesan',
     album: 'Premam (Original Motion Picture Soundtrack)',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/95/92/7d/95927d3c-99c7-5d07-a3f8-6202c382f7e0/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/31/ff/45/31ff45c9-94b7-f045-8f55-08197779d71c/mzaf_1033604473871408846.plus.aac.p.m4a',
+    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music2/v4/6f/3c/cd/6f3ccd36-2a0f-0c4e-ce51-5aebcf9e9f84/cover.jpg/600x600bb.jpg',
+    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/41/59/b4/4159b41b-708b-8140-d758-e8da1ed7bedd/mzaf_7080443034849106781.plus.aac.p.m4a',
     youtubeId: '0G2VxhV_g10',
     duration: 250, // Full 4 mins 10 secs
     genre: 'Evergreen Romantic Melody',
@@ -129,8 +132,8 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Entammede Jimikki Kammal',
     artist: 'Shaan Rahman, Vineeth Sreenivasan & Renjith Unni',
     album: 'Velipadinte Pusthakam',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/ca/87/1c/ca871c8f-2873-1959-8ddb-29d9195b867c/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/5a/04/b8/5a04b8df-d546-aeb5-3889-eb44b1c8f2fa/mzaf_14022415175945199616.plus.aac.p.m4a',
+    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/02/1b/0b/021b0b88-cd86-3669-2202-e0353e9942fb/840920109205.jpg/600x600bb.jpg',
+    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/91/81/f0/9181f09d-0d2c-6fc1-8c1e-18f27f04c979/mzaf_9189549283050732545.plus.aac.p.m4a',
     youtubeId: 'FXiaIH49oAU',
     duration: 205, // Full 3 mins 25 secs
     genre: 'College Flashmob Anthem',
@@ -158,7 +161,7 @@ export async function searchSongs(query, limit = 5) {
     return data.results.map((item) => {
       let highResCover = item.artworkUrl100
       if (highResCover) {
-        highResCover = highResCover.replace('100x100bb.jpg', '600x600bb.jpg')
+        highResCover = highResCover.replace(/100x100(?:bb)?\.(jpg|png|jpeg)/i, '600x600bb.$1')
       }
 
       // Check if we have an explicit YouTube video ID match in our dictionary
@@ -181,7 +184,7 @@ export async function searchSongs(query, limit = 5) {
         title: item.trackName,
         artist: item.artistName,
         album: item.collectionName || 'Single',
-        cover: highResCover || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
+        cover: highResCover || item.artworkUrl100 || DEFAULT_ALBUM_COVER,
         streamUrl: item.previewUrl,
         youtubeId: mappedYt ? mappedYt.id : null,
         searchQuery: `${item.trackName} ${item.artistName}`,

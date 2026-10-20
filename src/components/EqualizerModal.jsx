@@ -28,21 +28,21 @@ export function EqualizerModal({ isOpen, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-      <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl flex flex-col gap-4 relative">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
+      <div className="w-full max-w-sm bg-[#1c1c1e] border border-white/[0.08] text-white rounded-[28px] p-6 shadow-2xl flex flex-col gap-4 relative">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full bg-[#f1ebff] text-[#3814d4] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-[#2c2c2e] border border-white/10 text-[#ff7a00] flex items-center justify-center">
               <span className="material-symbols-outlined text-[20px]">equalizer</span>
             </div>
             <div>
-              <h3 className="text-lg font-bold text-[#1c163b]">Graphic Equalizer</h3>
-              <p className="text-xs text-[#474556]">Acoustic fine tuning</p>
+              <h3 className="text-lg font-bold text-white">Graphic Equalizer</h3>
+              <p className="text-xs text-white/50">Acoustic fine tuning</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#f1ebff] text-[#474556] flex items-center justify-center hover:bg-[#e6deff] transition-colors"
+            className="w-8 h-8 rounded-full bg-[#2c2c2e] text-white/70 hover:text-white flex items-center justify-center border border-white/5 transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
@@ -56,8 +56,8 @@ export function EqualizerModal({ isOpen, onClose }) {
               onClick={() => handleSelectPreset(p)}
               className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 preset === p
-                  ? 'bg-[#3814d4] text-white shadow-sm'
-                  : 'bg-[#f7f1ff] text-[#474556] hover:bg-[#e6deff]'
+                  ? 'bg-[#ff7a00] text-black shadow-sm font-extrabold'
+                  : 'bg-[#242426] text-white/70 hover:text-white border border-white/5'
               }`}
             >
               {p}
@@ -66,10 +66,10 @@ export function EqualizerModal({ isOpen, onClose }) {
         </div>
 
         {/* Frequency sliders */}
-        <div className="bg-[#f7f1ff] p-4 rounded-2xl flex justify-between items-center h-44">
+        <div className="bg-[#242426] border border-white/5 p-4 rounded-2xl flex justify-between items-center h-44">
           {Object.entries(bands).map(([hz, val]) => (
             <div key={hz} className="flex flex-col items-center justify-between h-full w-10">
-              <span className="text-[10px] font-bold text-[#3814d4]">
+              <span className="text-[10px] font-bold text-[#ff7a00]">
                 {val > 0 ? `+${val}` : val}dB
               </span>
               <div className="relative h-24 flex items-center justify-center">
@@ -82,17 +82,17 @@ export function EqualizerModal({ isOpen, onClose }) {
                     setBands((prev) => ({ ...prev, [hz]: parseInt(e.target.value) }))
                     setPreset('Custom')
                   }}
-                  className="w-24 h-2 accent-[#3814d4] -rotate-90 appearance-none bg-[#e6deff] rounded-full cursor-pointer"
+                  className="w-24 h-2 accent-[#ff7a00] -rotate-90 appearance-none bg-[#1c1c1e] rounded-full cursor-pointer"
                 />
               </div>
-              <span className="text-[10px] font-bold text-[#474556]">{hz}</span>
+              <span className="text-[10px] font-bold text-white/60">{hz}</span>
             </div>
           ))}
         </div>
 
         <button
           onClick={onClose}
-          className="w-full py-3 bg-[#3814d4] text-white font-bold rounded-2xl shadow-md active:scale-98 transition-transform cursor-pointer"
+          className="w-full py-3 bg-[#ff7a00] hover:bg-[#ff8c1a] text-black font-extrabold rounded-2xl shadow-md active:scale-98 transition-transform cursor-pointer"
         >
           Apply Audio Profile
         </button>

@@ -32,56 +32,56 @@ export function AuditionModal({ isOpen, onClose, onSubmitAudition }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-      <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl flex flex-col gap-3 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
+      <div className="w-full max-w-sm bg-[#1c1c1e] border border-white/[0.08] text-white rounded-[28px] p-6 shadow-2xl flex flex-col gap-3 relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f1ebff] text-[#474556] flex items-center justify-center hover:bg-[#e6deff]"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#2c2c2e] text-white/70 hover:text-white flex items-center justify-center border border-white/5 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[18px]">close</span>
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-2xl bg-[#e40468] text-white flex items-center justify-center">
+          <div className="w-10 h-10 rounded-2xl bg-[#2c2c2e] border border-white/10 text-[#ff7a00] flex items-center justify-center">
             <span className="material-symbols-outlined text-[22px]">mic</span>
           </div>
           <div>
-            <h3 className="text-[17px] font-black text-[#1c163b]">RJ & Host Audition</h3>
-            <p className="text-[11px] text-[#474556]">Pitch your show on MESCE FM 108.1</p>
+            <h3 className="text-[17px] font-black text-white">RJ & Host Audition</h3>
+            <p className="text-[11px] text-white/60">Pitch your show on MESCE FM 108.1</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 mt-1">
           <div>
-            <label className="text-[11px] font-bold text-[#474556] block mb-1">Your Full Name *</label>
+            <label className="text-[11px] font-bold text-white/60 block mb-1">Your Full Name *</label>
             <input
               type="text"
               required
               placeholder="e.g. Farhan / Ananya"
               value={applicantName}
               onChange={(e) => setApplicantName(e.target.value)}
-              className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#e40468]"
+              className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
             />
           </div>
 
           <div>
-            <label className="text-[11px] font-bold text-[#474556] block mb-1">Department & Semester *</label>
+            <label className="text-[11px] font-bold text-white/60 block mb-1">Department & Semester *</label>
             <input
               type="text"
               required
               placeholder="e.g. Computer Science, Year 3"
               value={dept}
               onChange={(e) => setDept(e.target.value)}
-              className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#e40468]"
+              className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
             />
           </div>
 
           <div>
-            <label className="text-[11px] font-bold text-[#474556] block mb-1">Preferred Broadcast Time</label>
+            <label className="text-[11px] font-bold text-white/60 block mb-1">Preferred Broadcast Time</label>
             <select
               value={preferredTime}
               onChange={(e) => setPreferredTime(e.target.value)}
-              className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#e40468]"
+              className="w-full bg-[#242426] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
             >
               <option value="Morning Labs (8:30 AM – 9:30 AM)">Morning Labs (8:30 AM – 9:30 AM)</option>
               <option value="Canteen Break (12:30 PM – 2:00 PM)">Canteen Break (12:30 PM – 2:00 PM)</option>
@@ -92,24 +92,24 @@ export function AuditionModal({ isOpen, onClose, onSubmitAudition }) {
           </div>
 
           <div>
-            <label className="text-[11px] font-bold text-[#474556] block mb-1">Show Pitch / Concept *</label>
+            <label className="text-[11px] font-bold text-white/60 block mb-1">Show Pitch / Concept *</label>
             <textarea
               required
               rows="3"
               placeholder="Tell us what your show will be about, the music genre, campus topics or guest interviews..."
               value={showConcept}
               onChange={(e) => setShowConcept(e.target.value)}
-              className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl p-2.5 text-[12px] text-[#1c163b] outline-none focus:border-[#e40468]"
+              className="w-full bg-[#242426] border border-white/10 rounded-xl p-2.5 text-[12px] text-white outline-none focus:border-[#ff7a00]"
             ></textarea>
           </div>
 
-          <div className="text-[10px] text-[#777587]">
+          <div className="text-[10px] text-white/50">
             🎙️ Selected applicants will be called to the MESCE FM studio for a 5-minute pilot recording session.
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 rounded-2xl bg-[#e40468] hover:bg-[#b70051] text-white font-black text-[13px] shadow-md transition-all cursor-pointer mt-1 active:scale-98"
+            className="w-full py-3 rounded-2xl bg-[#ff7a00] hover:bg-[#ff8c1a] text-black font-extrabold text-[13px] shadow-md transition-all cursor-pointer mt-1 active:scale-98"
           >
             Submit RJ Application
           </button>
