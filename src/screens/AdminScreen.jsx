@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import confetti from 'canvas-confetti'
 import { seedCampusDataToFirestore } from '../firebase/db'
+import { fetchBestMatch } from '../services/musicService'
 
 export function AdminScreen({
   radioState,
@@ -18,6 +19,11 @@ export function AdminScreen({
   auditions,
   onUpdateAuditions,
   musicSubmissions,
+  queue = [],
+  onPlayTrack,
+  onQueueTrack,
+  onRemoveFromQueue,
+  onSkipNext,
   onExitAdmin,
 }) {
   const [activeAdminTab, setActiveAdminTab] = useState('studio') // 'studio' | 'moderation' | 'wire' | 'auditions' | 'music'
@@ -93,6 +99,64 @@ export function AdminScreen({
     onUpdateSongRequests(
       songRequests.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
     )
+  }
+
+  // Play song request immediately on air
+  const handlePlayRequestNow = async (req) => {
+    let track = null
+    if (req.streamUrl) {
+      track = req
+    } else {
+      const match = await fetchBestMatch(req.songTitle, req.artist)
+      track = {
+        ...match,
+        id: req.id,
+        title: req.songTitle || match.title,
+        artist: req.artist || match.artist,
+      }
+    }
+
+    if (onPlayTrack) {
+      onPlayTrack({
+        ...track,
+        dedication: {
+          requester: req.requester,
+          to: req.dedicationTo,
+          message: req.message,
+        },
+      })
+    }
+    handleUpdateRequestStatus(req.id, 'Now Playing')
+    confetti({ particleCount: 30, spread: 50 })
+  }
+
+  // Queue song request right after current song
+  const handleQueueRequestNext = async (req) => {
+    let track = null
+    if (req.streamUrl) {
+      track = req
+    } else {
+      const match = await fetchBestMatch(req.songTitle, req.artist)
+      track = {
+        ...match,
+        id: req.id,
+        title: req.songTitle || match.title,
+        artist: req.artist || match.artist,
+      }
+    }
+
+    if (onQueueTrack) {
+      onQueueTrack({
+        ...track,
+        dedication: {
+          requester: req.requester,
+          to: req.dedicationTo,
+          message: req.message,
+        },
+      })
+    }
+    handleUpdateRequestStatus(req.id, 'Playing Soon')
+    confetti({ particleCount: 20, spread: 40 })
   }
 
   // Delete song request
@@ -278,6 +342,117 @@ export function AdminScreen({
       {/* SECTION 1: Studio Live Controller */}
       {activeAdminTab === 'studio' && (
         <div className="px-4 mt-3 flex flex-col gap-3">
+          {/* Live Audio Playback & Real-Time Queue Manager */}
+          <div className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
+            <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#00d26a] animate-pulse"></span>
+                <h3 className="text-[14px] font-black text-[#1c163b]">On-Air Playback & Audio Queue</h3>
+              </div>
+              <button
+                type="button"
+                onClick={onSkipNext}
+                className="px-2.5 py-1 bg-[#3814d4] text-white rounded-xl text-[10px] font-bold hover:bg-[#2400a0] flex items-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
+              >
+                <span>Skip to Next</span>
+                <span className="material-symbols-outlined text-[13px]">skip_next</span>
+              </button>
+            </div>
+
+            {/* Currently Playing Card */}
+            <div className="p-3 rounded-2xl bg-gradient-to-r from-[#ffd9df] to-[#f1ebff] border border-[#e40468]/30 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                {radioState.currentShow?.nowPlaying?.cover ? (
+                  <img
+                    src={radioState.currentShow.nowPlaying.cover}
+                    alt="Current cover"
+                    className="w-11 h-11 rounded-xl object-cover shadow-xs shrink-0"
+                  />
+                ) : (
+                  <div className="w-11 h-11 rounded-xl bg-[#e40468] text-white flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-[20px]">music_note</span>
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <span className="text-[9px] font-black uppercase text-[#e40468] flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#e40468] animate-ping"></span>
+                    BROADCASTING LIVE
+                  </span>
+                  <h4 className="text-[13px] font-black text-[#1c163b] truncate">
+                    {radioState.currentShow?.nowPlaying?.title || 'MESCE FM Track'}
+                  </h4>
+                  <p className="text-[10px] text-[#474556] truncate">
+                    {radioState.currentShow?.nowPlaying?.artist}
+                    {radioState.currentShow?.nowPlaying?.dedication && (
+                      <span className="text-[#3814d4] font-bold ml-1">
+                        • Dedicated to {radioState.currentShow.nowPlaying.dedication.to}
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Queue List */}
+            <div className="flex flex-col gap-1.5 mt-1">
+              <div className="flex items-center justify-between text-[11px] font-bold text-[#474556]">
+                <span>Up Next in Queue ({queue.length})</span>
+                {queue.length > 0 && <span className="text-[#3814d4]">Auto-plays after current song</span>}
+              </div>
+
+              {queue.length === 0 ? (
+                <div className="p-3 rounded-2xl bg-[#f7f1ff] border border-[#e6deff]/40 text-center text-[11px] text-[#777587]">
+                  Queue is empty. Station is rotating continuous curated Malayalam & campus hits.
+                </div>
+              ) : (
+                queue.map((qTrack, qIdx) => (
+                  <div
+                    key={qTrack.id || qIdx}
+                    className="p-2.5 rounded-2xl bg-[#f7f1ff] border border-[#e6deff]/50 flex items-center justify-between gap-2"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-5 h-5 rounded-full bg-[#ebe5ff] text-[#3814d4] text-[10px] font-black flex items-center justify-center shrink-0 font-mono">
+                        {qIdx + 1}
+                      </span>
+                      {qTrack.cover && (
+                        <img
+                          src={qTrack.cover}
+                          alt={qTrack.title}
+                          className="w-8 h-8 rounded-lg object-cover shrink-0"
+                        />
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-black text-[#1c163b] truncate">{qTrack.title}</p>
+                        <p className="text-[10px] text-[#777587] truncate">
+                          {qTrack.artist} {qTrack.dedication ? `(For ${qTrack.dedication.to})` : ''}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => onPlayTrack && onPlayTrack(qTrack)}
+                        className="px-2 py-1 bg-[#3814d4] text-white rounded-lg text-[9px] font-bold hover:bg-[#2400a0] cursor-pointer"
+                        title="Broadcast immediately"
+                      >
+                        Play Now
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onRemoveFromQueue && onRemoveFromQueue(qIdx)}
+                        className="w-6 h-6 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 flex items-center justify-center text-[11px] cursor-pointer"
+                        title="Remove from queue"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
           <form onSubmit={handleSaveStudio} className="bg-white p-4.5 rounded-3xl border border-[#e6deff]/60 shadow-sm flex flex-col gap-3">
             <div className="flex items-center justify-between pb-2 border-b border-[#f1ebff]">
               <h3 className="text-[15px] font-black text-[#1c163b] flex items-center gap-1.5">
@@ -428,19 +603,35 @@ export function AdminScreen({
               {songRequests.map((req) => (
                 <div
                   key={req.id}
-                  className="p-3 rounded-2xl bg-[#f7f1ff] border border-[#e6deff]/40 flex flex-col gap-1.5"
+                  className="p-3.5 rounded-2xl bg-[#f7f1ff] border border-[#e6deff]/40 flex flex-col gap-2"
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="text-[13px] font-black text-[#1c163b]">{req.songTitle}</h4>
-                      <p className="text-[11px] text-[#474556]">{req.artist}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {req.cover ? (
+                        <img
+                          src={req.cover}
+                          alt={req.songTitle}
+                          className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-xs"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-[#3814d4]/10 text-[#3814d4] flex items-center justify-center shrink-0">
+                          <span className="material-symbols-outlined text-[20px]">music_note</span>
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <h4 className="text-[13px] font-black text-[#1c163b] truncate">{req.songTitle}</h4>
+                        <p className="text-[11px] text-[#474556] truncate">{req.artist}</p>
+                      </div>
                     </div>
+
                     <span
-                      className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase ${
-                        req.status === 'Approved'
+                      className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
+                        req.status === 'Now Playing'
+                          ? 'bg-[#ffd9df] text-[#e40468] animate-pulse'
+                          : req.status === 'Queued (Up Next)' || req.status === 'Playing Soon'
+                          ? 'bg-[#e3dfff] text-[#140067]'
+                          : req.status === 'Approved'
                           ? 'bg-green-100 text-green-700'
-                          : req.status === 'Playing Soon'
-                          ? 'bg-[#ffd9df] text-[#e40468]'
                           : 'bg-amber-100 text-amber-800'
                       }`}
                     >
@@ -455,20 +646,34 @@ export function AdminScreen({
 
                   <div className="flex items-center justify-end gap-1.5 pt-1.5 border-t border-[#e6deff]/40">
                     <button
+                      type="button"
+                      onClick={() => handlePlayRequestNow(req)}
+                      className="px-2.5 py-1 bg-[#e40468] hover:bg-[#b70051] text-white rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1 shadow-xs"
+                      title="Broadcast immediately on air"
+                    >
+                      <span className="material-symbols-outlined text-[13px]">bolt</span>
+                      <span>Play Now</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleQueueRequestNext(req)}
+                      className="px-2.5 py-1 bg-[#3814d4] hover:bg-[#2400a0] text-white rounded-lg text-[10px] font-bold cursor-pointer flex items-center gap-1 shadow-xs"
+                      title="Add to queue to play right after current track"
+                    >
+                      <span className="material-symbols-outlined text-[13px]">queue_music</span>
+                      <span>Queue Next</span>
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => handleUpdateRequestStatus(req.id, 'Approved')}
-                      className="px-2.5 py-1 bg-[#3814d4] text-white rounded-lg text-[10px] font-bold hover:bg-[#2400a0] cursor-pointer"
+                      className="px-2.5 py-1 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-[10px] font-bold cursor-pointer"
                     >
                       Approve
                     </button>
                     <button
-                      onClick={() => handleUpdateRequestStatus(req.id, 'Playing Soon')}
-                      className="px-2.5 py-1 bg-[#e40468] text-white rounded-lg text-[10px] font-bold hover:bg-[#b70051] cursor-pointer"
-                    >
-                      Playing Soon
-                    </button>
-                    <button
+                      type="button"
                       onClick={() => handleDeleteRequest(req.id)}
-                      className="px-2 py-1 bg-red-100 text-red-700 rounded-lg text-[10px] font-bold cursor-pointer"
+                      className="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-[10px] font-bold cursor-pointer"
                     >
                       Dismiss
                     </button>

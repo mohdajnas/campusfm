@@ -1,39 +1,67 @@
-// Audio Engine: Web Audio API & HTML5 Live Stream Player
+// Audio Engine: Real Music Stream & On-Air Dynamic Queue Player for MESCE FM 108.1
+import { DEFAULT_MALAYALAM_PLAYLIST } from './musicService'
 
 class AudioEngine {
   constructor() {
     this.audio = new Audio()
-    this.audio.preload = 'none'
+    this.audio.preload = 'auto'
     this.audio.crossOrigin = 'anonymous'
 
     this.audioCtx = null
-    this.synthOsc = null
-    this.synthGain = null
-    this.staticNoiseNode = null
-    this.analyser = null
-    this.isSynthPlaying = false
-    this.currentStationId = null
     this.isPlaying = false
     this.volume = 0.8
-    this.listeners = new Set()
-
     this.audio.volume = this.volume
 
+    // Playback state
+    this.currentTrack = DEFAULT_MALAYALAM_PLAYLIST[0]
+    this.queue = [] // Array of tracks waiting to play next (e.g. user dedications)
+    this.history = [] // Array of played tracks
+    this.defaultPlaylist = DEFAULT_MALAYALAM_PLAYLIST
+    this.playlistIndex = 0
+
+    this.currentTime = 0
+    this.duration = 30
+    this.listeners = new Set()
+
+    // Setup HTML5 Audio Event Listeners
     this.audio.addEventListener('playing', () => {
       this.isPlaying = true
       this.notify()
     })
 
     this.audio.addEventListener('pause', () => {
-      if (!this.isSynthPlaying) {
-        this.isPlaying = false
-        this.notify()
+      this.isPlaying = false
+      this.notify()
+    })
+
+    this.audio.addEventListener('timeupdate', () => {
+      this.currentTime = this.audio.currentTime
+      if (this.audio.duration && !isNaN(this.audio.duration)) {
+        this.duration = this.audio.duration
       }
+      this.notify()
+    })
+
+    this.audio.addEventListener('loadedmetadata', () => {
+      if (this.audio.duration && !isNaN(this.audio.duration)) {
+        this.duration = this.audio.duration
+      }
+      this.notify()
+    })
+
+    // AUTO-ADVANCE: When track ends, play the next track in queue (e.g. requested song)
+    this.audio.addEventListener('ended', () => {
+      console.log('MESCE FM: Track completed. Auto-advancing to next queued track...')
+      this.advanceNext()
     })
 
     this.audio.addEventListener('error', (err) => {
-      console.warn('Live stream encountered network/CORS issue, engaging radio synthesizer fallback.', err)
-      this.startRadioSynth()
+      console.warn('Audio stream error or network block, skipping to next track:', err)
+      setTimeout(() => {
+        if (this.isPlaying) {
+          this.advanceNext()
+        }
+      }, 1000)
     })
   }
 
@@ -51,177 +79,184 @@ class AudioEngine {
 
   subscribe(listener) {
     this.listeners.add(listener)
+    // Send immediate initial state
+    try {
+      listener(this.getState())
+    } catch (e) {
+      console.error(e)
+    }
     return () => this.listeners.delete(listener)
   }
 
   notify() {
+    const state = this.getState()
     for (const listener of this.listeners) {
       try {
-        listener({
-          isPlaying: this.isPlaying,
-          volume: this.volume,
-          isSynth: this.isSynthPlaying,
-        })
+        listener(state)
       } catch (e) {
         console.error(e)
       }
     }
   }
 
+  getState() {
+    return {
+      isPlaying: this.isPlaying,
+      volume: this.volume,
+      currentTrack: this.currentTrack,
+      queue: [...this.queue],
+      history: [...this.history],
+      currentTime: this.currentTime,
+      duration: this.duration || 30,
+    }
+  }
+
   setVolume(vol) {
     this.volume = Math.max(0, Math.min(1, vol))
     this.audio.volume = this.volume
-    if (this.synthGain && this.audioCtx) {
-      this.synthGain.gain.setValueAtTime(this.volume * 0.15, this.audioCtx.currentTime)
-    }
     this.notify()
   }
 
-  playStation(station) {
-    this.initContext()
-    this.currentStationId = station.id
-
-    // Play quick authentic frequency tuner chirp
-    this.playTuningChirp(station.freqNum)
-
-    this.stopSynth()
-    this.audio.pause()
-
-    if (station.streamUrl) {
-      this.audio.src = station.streamUrl
-      const playPromise = this.audio.play()
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            this.isPlaying = true
-            this.isSynthPlaying = false
-            this.notify()
-          })
-          .catch((e) => {
-            console.log('Stream auto-play blocked or stream offline. Falling back to synth engine.', e)
-            this.startRadioSynth(station)
-          })
-      }
-    } else {
-      this.startRadioSynth(station)
+  seek(seconds) {
+    if (!isNaN(seconds) && this.audio) {
+      this.audio.currentTime = Math.max(0, Math.min(seconds, this.duration || 1000))
+      this.currentTime = this.audio.currentTime
+      this.notify()
     }
   }
 
-  togglePlay(station) {
+  /**
+   * Starts playing a specific track immediately
+   */
+  playTrack(track) {
+    this.initContext()
+    if (!track || !track.streamUrl) return
+
+    // If there is an active current track, save to history
+    if (this.currentTrack && this.currentTrack.id !== track.id) {
+      this.history.unshift(this.currentTrack)
+      if (this.history.length > 20) this.history.pop()
+    }
+
+    this.currentTrack = track
+    this.currentTime = 0
+    this.duration = track.duration || 30
+    this.audio.src = track.streamUrl
+
+    const playPromise = this.audio.play()
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          this.isPlaying = true
+          this.notify()
+        })
+        .catch((e) => {
+          console.warn('Audio auto-play blocked by browser policy:', e)
+          this.isPlaying = false
+          this.notify()
+        })
+    }
+  }
+
+  /**
+   * Toggles playback between play and pause.
+   */
+  togglePlay(overrideTrack) {
+    this.initContext()
     if (this.isPlaying) {
       this.pause()
     } else {
-      if (station) {
-        this.playStation(station)
+      if (overrideTrack) {
+        this.playTrack(overrideTrack)
+      } else if (this.audio.src) {
+        this.audio.play().catch(() => {
+          if (this.currentTrack) this.playTrack(this.currentTrack)
+        })
       } else {
-        this.audio.play().catch(() => this.startRadioSynth())
+        const trackToPlay = this.currentTrack || this.defaultPlaylist[0]
+        this.playTrack(trackToPlay)
       }
     }
   }
 
   pause() {
     this.audio.pause()
-    this.stopSynth()
     this.isPlaying = false
     this.notify()
   }
 
-  playTuningChirp(freq = 100.0) {
-    if (!this.audioCtx) return
-    try {
-      const osc = this.audioCtx.createOscillator()
-      const gain = this.audioCtx.createGain()
-      const now = this.audioCtx.currentTime
+  /**
+   * Adds a track to the playback queue.
+   * If playNext is true (standard for song requests / dedications),
+   * inserts it at position 0 so it plays right after the current song!
+   */
+  addToQueue(track, playNext = true) {
+    if (!track) return
 
-      // Frequency glide based on MHz
-      const baseFreq = 300 + (freq - 87.5) * 20
-      osc.type = 'triangle'
-      osc.frequency.setValueAtTime(baseFreq, now)
-      osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, now + 0.08)
-
-      gain.gain.setValueAtTime(this.volume * 0.06, now)
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08)
-
-      osc.connect(gain)
-      gain.connect(this.audioCtx.destination)
-
-      osc.start(now)
-      osc.stop(now + 0.09)
-    } catch {
-      // Ignore audio glitch on old devices
+    if (playNext) {
+      this.queue.unshift(track) // Plays right after current track!
+    } else {
+      this.queue.push(track)
     }
+
+    // If nothing is currently playing, start playing it immediately
+    if (!this.isPlaying && (!this.audio.src || this.audio.paused)) {
+      const next = this.queue.shift()
+      this.playTrack(next)
+      return
+    }
+
+    this.notify()
   }
 
-  // Realistic synthetic FM radio sound engine
-  startRadioSynth(station) {
-    this.initContext()
-    if (!this.audioCtx) return
-    this.stopSynth()
-
-    try {
-      const now = this.audioCtx.currentTime
-      const master = this.audioCtx.createGain()
-      master.gain.setValueAtTime(this.volume * 0.12, now)
-      master.connect(this.audioCtx.destination)
-
-      // Chords based on station frequency
-      const fNum = station?.freqNum || 102.7
-      const root = 140 + (fNum % 12) * 15
-
-      const chordFrequencies = [root, root * 1.25, root * 1.5, root * 2]
-      this.synthOscs = []
-
-      chordFrequencies.forEach((f, idx) => {
-        const osc = this.audioCtx.createOscillator()
-        const g = this.audioCtx.createGain()
-        osc.type = idx % 2 === 0 ? 'sine' : 'triangle'
-        osc.frequency.setValueAtTime(f, now)
-
-        // subtle vibrato
-        const lfo = this.audioCtx.createOscillator()
-        const lfoGain = this.audioCtx.createGain()
-        lfo.frequency.setValueAtTime(2 + idx * 0.5, now)
-        lfoGain.gain.setValueAtTime(2, now)
-        lfo.connect(osc.frequency)
-        lfo.start(now)
-
-        g.gain.setValueAtTime(0.08 / (idx + 1), now)
-        osc.connect(g)
-        g.connect(master)
-        osc.start(now)
-        this.synthOscs.push(osc, lfo)
-      })
-
-      this.synthGain = master
-      this.isSynthPlaying = true
-      this.isPlaying = true
+  /**
+   * Removes a track from the queue at a given index
+   */
+  removeFromQueue(index) {
+    if (index >= 0 && index < this.queue.length) {
+      this.queue.splice(index, 1)
       this.notify()
-    } catch (e) {
-      console.warn('Radio synthesizer initialization note:', e)
     }
   }
 
-  stopSynth() {
-    if (this.synthOscs) {
-      this.synthOscs.forEach((o) => {
-        try {
-          o.stop()
-          o.disconnect()
-        } catch {
-          // Ignore
-        }
-      })
-      this.synthOscs = []
+  /**
+   * Advances to the next track:
+   * 1. If queue has items (e.g. requested songs), plays the first one.
+   * 2. If queue is empty, plays the next song from the default campus rotation.
+   */
+  advanceNext() {
+    if (this.queue.length > 0) {
+      const nextSong = this.queue.shift()
+      this.playTrack(nextSong)
+    } else {
+      // Loop through campus default playlist
+      this.playlistIndex = (this.playlistIndex + 1) % this.defaultPlaylist.length
+      const nextDefaultSong = this.defaultPlaylist[this.playlistIndex]
+      this.playTrack(nextDefaultSong)
     }
-    if (this.synthGain) {
-      try {
-        this.synthGain.disconnect()
-      } catch {
-        // Ignore
-      }
-      this.synthGain = null
+  }
+
+  /**
+   * Skips to the previous track or replays current
+   */
+  skipPrev() {
+    if (this.currentTime > 3) {
+      this.seek(0)
+    } else if (this.history.length > 0) {
+      const prevTrack = this.history.shift()
+      this.playTrack(prevTrack)
+    } else {
+      this.playlistIndex =
+        (this.playlistIndex - 1 + this.defaultPlaylist.length) % this.defaultPlaylist.length
+      this.playTrack(this.defaultPlaylist[this.playlistIndex])
     }
-    this.isSynthPlaying = false
+  }
+
+  /**
+   * Skip forward to next track (Queue or next rotation)
+   */
+  skipNext() {
+    this.advanceNext()
   }
 }
 

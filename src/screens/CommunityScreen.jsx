@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import confetti from 'canvas-confetti'
+import { searchSongs } from '../services/musicService'
 
 export function CommunityScreen({
   chatMessages,
@@ -11,6 +12,9 @@ export function CommunityScreen({
   confessions,
   onAddConfession,
   onReactConfession,
+  nowPlayingTitle,
+  queue = [],
+  onPlayNow,
 }) {
   const [activeTab, setActiveTab] = useState('chat') // 'chat' | 'requests' | 'polls' | 'confessions'
   const [chatInput, setChatInput] = useState('')
@@ -25,6 +29,9 @@ export function CommunityScreen({
   const [reqDedication, setReqDedication] = useState('')
   const [reqMessage, setReqMessage] = useState('')
   const [isAnonReq, setIsAnonReq] = useState(false)
+  const [searchResults, setSearchResults] = useState([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [selectedTrack, setSelectedTrack] = useState(null)
 
   // Confession modal state
   const [isConfessionModalOpen, setIsConfessionModalOpen] = useState(false)
@@ -59,26 +66,57 @@ export function CommunityScreen({
     })
   }
 
+  // Live search effect for songs as user types
+  useEffect(() => {
+    if (!reqSong.trim() || reqSong.trim().length < 2) {
+      setSearchResults([])
+      setIsSearching(false)
+      return
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearching(true)
+      const query = reqArtist.trim() ? `${reqSong} ${reqArtist}` : reqSong
+      const results = await searchSongs(query, 4)
+      setSearchResults(results)
+      setIsSearching(false)
+    }, 350)
+
+    return () => clearTimeout(timer)
+  }, [reqSong, reqArtist])
+
+  const handleSelectTrack = (track) => {
+    setSelectedTrack(track)
+    setReqSong(track.title)
+    setReqArtist(track.artist)
+    setSearchResults([])
+  }
+
   const handleSubmitRequest = (e) => {
     e.preventDefault()
     if (!reqSong.trim()) return
 
     onAddSongRequest({
-      songTitle: reqSong.trim(),
-      artist: reqArtist.trim() || 'Requested Artist',
+      songTitle: selectedTrack ? selectedTrack.title : reqSong.trim(),
+      artist: selectedTrack ? selectedTrack.artist : (reqArtist.trim() || 'Campus Requested'),
+      cover: selectedTrack?.cover,
+      streamUrl: selectedTrack?.streamUrl,
+      duration: selectedTrack?.duration || 30,
       requester: isAnonReq ? 'Anonymous Student' : (reqName.trim() || 'Campus Listener'),
       dedicationTo: reqDedication.trim() || 'Campus Friends',
       message: reqMessage.trim() || 'Play this track on MESCE FM!',
-      status: 'Pending',
+      status: 'Queued (Up Next)',
       timestamp: 'Just now',
     })
 
-    confetti({ particleCount: 30, spread: 60 })
+    confetti({ particleCount: 35, spread: 65 })
     setIsRequestModalOpen(false)
     setReqSong('')
     setReqArtist('')
     setReqDedication('')
     setReqMessage('')
+    setSelectedTrack(null)
+    setSearchResults([])
   }
 
   const handleSubmitConfession = (e) => {
@@ -239,58 +277,91 @@ export function CommunityScreen({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-[16px] font-extrabold text-[#1c163b]">On-Air Song Requests</h3>
-              <p className="text-[11px] text-[#474556]">Dedicate tracks to friends, lab partners & hostel mates</p>
+              <p className="text-[11px] text-[#474556]">Any requested song auto-queues to play next on air!</p>
             </div>
             <button
               onClick={() => setIsRequestModalOpen(true)}
-              className="px-3 py-2 bg-[#3814d4] text-white text-[11px] font-extrabold rounded-full shadow-md flex items-center gap-1 hover:bg-[#2400a0] transition-all cursor-pointer"
+              className="px-3.5 py-2 bg-[#3814d4] text-white text-[11px] font-extrabold rounded-full shadow-md flex items-center gap-1.5 hover:bg-[#2400a0] transition-all cursor-pointer active:scale-95"
             >
-              <span className="material-symbols-outlined text-[16px]">add</span>
-              <span>Dedicate</span>
+              <span className="material-symbols-outlined text-[16px]">queue_music</span>
+              <span>Dedicate Song</span>
             </button>
           </div>
 
           <div className="flex flex-col gap-2.5">
-            {songRequests.map((req) => (
-              <div
-                key={req.id}
-                className="p-3.5 rounded-2xl bg-white border border-[#e6deff]/60 shadow-sm flex flex-col gap-2"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-[#e40468]/10 text-[#e40468] flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-[20px]">music_note</span>
+            {songRequests.map((req, idx) => {
+              const isCurrentlyPlaying = nowPlayingTitle && req.songTitle.toLowerCase().includes(nowPlayingTitle.toLowerCase().slice(0, 10))
+              const isNextInQueue = queue.some((q) => q.title.toLowerCase().includes(req.songTitle.toLowerCase().slice(0, 10)))
+
+              return (
+                <div
+                  key={req.id || idx}
+                  className={`p-3.5 rounded-2xl bg-white border transition-all shadow-sm flex flex-col gap-2 ${
+                    isCurrentlyPlaying
+                      ? 'border-[#e40468] ring-2 ring-[#ffd9df] shadow-md'
+                      : isNextInQueue
+                      ? 'border-[#3814d4] ring-1 ring-[#e3dfff]'
+                      : 'border-[#e6deff]/60'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {req.cover ? (
+                        <img
+                          src={req.cover}
+                          alt={req.songTitle}
+                          className="w-11 h-11 rounded-xl object-cover shadow-sm shrink-0"
+                        />
+                      ) : (
+                        <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#3814d4] to-[#e40468] text-white flex items-center justify-center shrink-0 shadow-sm">
+                          <span className="material-symbols-outlined text-[20px]">music_note</span>
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <h4 className="text-[14px] font-black text-[#1c163b] truncate">
+                          {req.songTitle}
+                        </h4>
+                        <p className="text-[11px] text-[#474556] truncate font-medium">{req.artist}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <h4 className="text-[14px] font-black text-[#1c163b] truncate">
-                        {req.songTitle}
-                      </h4>
-                      <p className="text-[11px] text-[#474556] truncate">{req.artist}</p>
-                    </div>
+
+                    <span
+                      className={`text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shrink-0 flex items-center gap-1 ${
+                        isCurrentlyPlaying
+                          ? 'bg-[#ffd9df] text-[#e40468] animate-pulse'
+                          : isNextInQueue
+                          ? 'bg-[#e3dfff] text-[#140067]'
+                          : req.status === 'Approved'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-[#f1ebff] text-[#474556]'
+                      }`}
+                    >
+                      {isCurrentlyPlaying ? (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#e40468] animate-ping"></span>
+                          <span>ON AIR NOW</span>
+                        </>
+                      ) : isNextInQueue ? (
+                        <>
+                          <span className="material-symbols-outlined text-[11px]">skip_next</span>
+                          <span>UP NEXT</span>
+                        </>
+                      ) : (
+                        req.status
+                      )}
+                    </span>
                   </div>
 
-                  <span
-                    className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
-                      req.status === 'Approved'
-                        ? 'bg-[#e3dfff] text-[#140067]'
-                        : req.status === 'Playing Soon'
-                        ? 'bg-[#ffd9df] text-[#e40468] animate-pulse'
-                        : 'bg-[#f1ebff] text-[#474556]'
-                    }`}
-                  >
-                    {req.status}
-                  </span>
-                </div>
-
-                <div className="bg-[#fdf8ff] p-2.5 rounded-xl border border-[#e6deff]/40 text-[11px]">
-                  <div className="flex items-center justify-between text-[#3814d4] font-bold mb-0.5">
-                    <span>From: {req.requester}</span>
-                    <span className="text-[#e40468]">To: {req.dedicationTo}</span>
+                  <div className="bg-[#fdf8ff] p-2.5 rounded-xl border border-[#e6deff]/40 text-[11px]">
+                    <div className="flex items-center justify-between text-[#3814d4] font-bold mb-0.5">
+                      <span>From: {req.requester}</span>
+                      <span className="text-[#e40468]">To: {req.dedicationTo}</span>
+                    </div>
+                    <p className="text-[#474556] italic">"{req.message}"</p>
                   </div>
-                  <p className="text-[#474556] italic">"{req.message}"</p>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
@@ -437,26 +508,114 @@ export function CommunityScreen({
             </div>
 
             <form onSubmit={handleSubmitRequest} className="flex flex-col gap-2.5 mt-1">
-              <div>
-                <label className="text-[11px] font-bold text-[#474556] block mb-1">Song Title *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Illuminati / Yellow / Aaranu Nee"
-                  value={reqSong}
-                  onChange={(e) => setReqSong(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[13px] text-[#1c163b] outline-none focus:border-[#3814d4]"
-                />
+              {/* Song Title Search Input */}
+              <div className="relative">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-bold text-[#474556]">Search Song Title *</label>
+                  {isSearching && (
+                    <span className="text-[10px] text-[#3814d4] font-bold flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#3814d4] animate-ping"></span>
+                      Searching...
+                    </span>
+                  )}
+                </div>
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Illuminati, Kuthanthram, Cherathukal, Avial..."
+                    value={reqSong}
+                    onChange={(e) => {
+                      setReqSong(e.target.value)
+                      if (selectedTrack && e.target.value !== selectedTrack.title) {
+                        setSelectedTrack(null)
+                      }
+                    }}
+                    className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl pl-8 pr-3 py-2 text-[13px] text-[#1c163b] font-bold outline-none focus:border-[#3814d4]"
+                  />
+                  <span className="material-symbols-outlined text-[16px] text-[#777587] absolute left-2.5 pointer-events-none">
+                    search
+                  </span>
+                </div>
+
+                {/* Instant Search Suggestions Dropdown */}
+                {searchResults.length > 0 && !selectedTrack && (
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#e6deff] rounded-2xl shadow-xl z-30 max-h-48 overflow-y-auto p-1.5 flex flex-col gap-1">
+                    <span className="text-[9px] uppercase tracking-wider font-black text-[#777587] px-2 py-0.5">
+                      Select Verified Playable Track:
+                    </span>
+                    {searchResults.map((track) => (
+                      <button
+                        type="button"
+                        key={track.id}
+                        onClick={() => handleSelectTrack(track)}
+                        className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#f1ebff] transition-all text-left cursor-pointer group"
+                      >
+                        <img
+                          src={track.cover}
+                          alt={track.title}
+                          className="w-8 h-8 rounded-lg object-cover shadow-xs shrink-0"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[12px] font-black text-[#1c163b] group-hover:text-[#3814d4] truncate">
+                            {track.title}
+                          </p>
+                          <p className="text-[10px] text-[#777587] truncate">{track.artist}</p>
+                        </div>
+                        <span className="text-[10px] font-bold text-[#3814d4] px-2 py-0.5 rounded-full bg-[#e3dfff] shrink-0">
+                          Select
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* Selected Track Preview Badge */}
+              {selectedTrack && (
+                <div className="p-2.5 rounded-2xl bg-gradient-to-r from-[#e3dfff] to-[#ffd9df] border border-[#3814d4]/30 flex items-center justify-between gap-2 shadow-xs">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <img
+                      src={selectedTrack.cover}
+                      alt={selectedTrack.title}
+                      className="w-10 h-10 rounded-xl object-cover shadow-sm shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[13px] text-[#3814d4]">
+                          check_circle
+                        </span>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-[#3814d4]">
+                          Verified Stream Ready
+                        </span>
+                      </div>
+                      <p className="text-[12px] font-black text-[#1c163b] truncate">
+                        {selectedTrack.title}
+                      </p>
+                      <p className="text-[10px] text-[#474556] truncate font-medium">
+                        {selectedTrack.artist} • {selectedTrack.album}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTrack(null)}
+                    className="w-6 h-6 rounded-full bg-white/80 text-[#474556] hover:bg-white flex items-center justify-center shrink-0 cursor-pointer text-xs"
+                    title="Change track"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
 
               <div>
                 <label className="text-[11px] font-bold text-[#474556] block mb-1">Artist / Band</label>
                 <input
                   type="text"
-                  placeholder="e.g. Sushin Shyam / Coldplay"
+                  placeholder="e.g. Sushin Shyam / Dabzee / Coldplay"
                   value={reqArtist}
                   onChange={(e) => setReqArtist(e.target.value)}
-                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[13px] text-[#1c163b] outline-none focus:border-[#3814d4]"
+                  className="w-full bg-[#f7f1ff] border border-[#e6deff] rounded-xl px-3 py-2 text-[12px] text-[#1c163b] outline-none focus:border-[#3814d4]"
                 />
               </div>
 
@@ -505,11 +664,19 @@ export function CommunityScreen({
                 ></textarea>
               </div>
 
+              <div className="bg-[#fffbf0] border border-[#ffdea8] p-2.5 rounded-xl text-[10px] text-[#5d4100] flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[15px] text-[#e40468] shrink-0">
+                  queue_music
+                </span>
+                <span>This song will be fetched and placed into the live radio queue right after the currently playing song!</span>
+              </div>
+
               <button
                 type="submit"
-                className="w-full py-3 rounded-2xl bg-[#3814d4] hover:bg-[#2400a0] text-white font-extrabold text-[13px] shadow-md transition-all cursor-pointer mt-1 active:scale-98"
+                className="w-full py-3 rounded-2xl bg-[#3814d4] hover:bg-[#2400a0] text-white font-black text-[13px] shadow-md transition-all cursor-pointer mt-0.5 active:scale-98 flex items-center justify-center gap-1.5"
               >
-                Send Request to Studio Desk
+                <span className="material-symbols-outlined text-[18px]">bolt</span>
+                <span>Queue Track (Plays Right After Current Song)</span>
               </button>
             </form>
           </div>

@@ -43,6 +43,7 @@ import {
   submitMusicToDb,
 } from './firebase/db'
 import { audioEngine } from './services/audioEngine'
+import { fetchBestMatch } from './services/musicService'
 import { Header } from './components/Header'
 import { Navbar } from './components/Navbar'
 import { MiniPlayer } from './components/MiniPlayer'
@@ -91,6 +92,9 @@ export default function App() {
   // Navigation & audio state
   const [activeScreen, setActiveScreen] = useState('on-air')
   const [isPlaying, setIsPlaying] = useState(false)
+  const [playbackQueue, setPlaybackQueue] = useState([])
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(30)
   const [isFavorite, setIsFavorite] = useState(true)
 
   // Admin authentication state
@@ -158,10 +162,32 @@ export default function App() {
     }
   }, [])
 
-  // 2. Audio Engine Sync
+  // 2. Audio Engine Sync (Queue, Track, Playback, Time)
   useEffect(() => {
     const unsubscribe = audioEngine.subscribe((state) => {
       setIsPlaying(state.isPlaying)
+      setPlaybackQueue(state.queue || [])
+      setCurrentTime(state.currentTime || 0)
+      setDuration(state.duration || 30)
+
+      if (state.currentTrack) {
+        setRadioState((prev) => ({
+          ...prev,
+          currentShow: {
+            ...prev.currentShow,
+            cover: state.currentTrack.cover || prev.currentShow?.cover,
+            nowPlaying: {
+              title: state.currentTrack.title,
+              artist: state.currentTrack.artist,
+              album: state.currentTrack.album || 'MESCE FM Campus Play',
+              cover: state.currentTrack.cover,
+              duration: state.currentTrack.duration,
+              dedication: state.currentTrack.dedication || null,
+            },
+          },
+          queue: state.queue || [],
+        }))
+      }
     })
     return () => unsubscribe()
   }, [])
@@ -188,55 +214,47 @@ export default function App() {
 
   // Audio Playback Handlers
   const handleTogglePlay = () => {
-    const currentStream = {
-      id: 'mesce-fm',
-      name: radioState.stationName,
-      freqNum: 108.1,
-      streamUrl: radioState.currentShow?.streamUrl || 'https://ice2.somafm.com/poptron-128-mp3',
-    }
-    audioEngine.togglePlay(currentStream)
+    audioEngine.togglePlay()
+  }
+
+  const handleSkipNext = () => {
+    audioEngine.skipNext()
+  }
+
+  const handleSkipPrev = () => {
+    audioEngine.skipPrev()
+  }
+
+  const handleSeek = (time) => {
+    audioEngine.seek(time)
+  }
+
+  const handlePlaySpecificTrack = (track) => {
+    audioEngine.playTrack(track)
   }
 
   const handlePlayPodcast = (podcast) => {
-    audioEngine.playStation({
+    audioEngine.playTrack({
       id: podcast.id,
-      name: podcast.title,
-      freqNum: 108.1,
-      streamUrl: podcast.streamUrl,
+      title: podcast.title,
+      artist: podcast.host,
+      album: 'MESCE FM Podcast Archive',
+      cover: podcast.cover,
+      streamUrl: podcast.streamUrl || 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/4a/12/58/4a125867-248d-cefe-7917-862d2579dfd9/mzaf_16259021469113642777.plus.aac.p.m4a',
+      duration: 180,
     })
-    setRadioState((prev) => ({
-      ...prev,
-      currentShow: {
-        ...prev.currentShow,
-        title: podcast.title,
-        rj: podcast.host,
-        nowPlaying: {
-          title: podcast.title,
-          artist: podcast.host,
-          album: 'MESCE FM Podcast Archive',
-        },
-      },
-    }))
   }
 
   const handlePlayTrack = (track) => {
-    audioEngine.playStation({
-      id: 'student-track',
-      name: track.title,
-      freqNum: 108.1,
-      streamUrl: 'https://ice2.somafm.com/groovesalad-128-mp3',
+    audioEngine.playTrack({
+      id: track.id || `track-${Date.now()}`,
+      title: track.title,
+      artist: track.artist,
+      album: track.album || 'Student Showcase',
+      cover: track.cover || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
+      streamUrl: track.streamUrl || 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/43/a0/da/43a0daa2-504d-6b7c-c63a-0c8864608a6d/mzaf_7754996064757215177.plus.aac.p.m4a',
+      duration: 30,
     })
-    setRadioState((prev) => ({
-      ...prev,
-      currentShow: {
-        ...prev.currentShow,
-        nowPlaying: {
-          title: track.title,
-          artist: track.artist,
-          album: track.album || 'Student Showcase',
-        },
-      },
-    }))
   }
 
   // Real-time Community Handlers
@@ -251,9 +269,55 @@ export default function App() {
   }
 
   const handleAddSongRequest = async (req) => {
-    setSongRequests((prev) => [{ ...req, id: `temp-${Date.now()}` }, ...prev])
+    // 1. Resolve full playable track metadata and stream URL
+    let resolved = null
+    if (req.streamUrl) {
+      resolved = {
+        id: `req-${Date.now()}`,
+        title: req.songTitle,
+        artist: req.artist,
+        cover: req.cover,
+        streamUrl: req.streamUrl,
+        duration: req.duration || 30,
+      }
+    } else {
+      const match = await fetchBestMatch(req.songTitle, req.artist)
+      resolved = {
+        ...match,
+        id: `req-${Date.now()}`,
+        title: req.songTitle || match.title,
+        artist: req.artist || match.artist,
+      }
+    }
+
+    const enrichedRequest = {
+      ...req,
+      id: resolved.id,
+      songTitle: resolved.title,
+      artist: resolved.artist,
+      cover: resolved.cover,
+      streamUrl: resolved.streamUrl,
+      duration: resolved.duration,
+      status: 'Queued (Up Next)',
+    }
+
+    // 2. Add to audio engine queue right after current playing song with dedication!
+    audioEngine.addToQueue(
+      {
+        ...resolved,
+        dedication: {
+          requester: req.requester,
+          to: req.dedicationTo,
+          message: req.message,
+        },
+      },
+      true // playNext = true, so it plays right after the current playing song!
+    )
+
+    // 3. Save to state & Firestore
+    setSongRequests((prev) => [enrichedRequest, ...prev])
     try {
-      await addSongRequestToDb(req)
+      await addSongRequestToDb(enrichedRequest)
     } catch {
       // Local fallback
     }
@@ -431,6 +495,9 @@ export default function App() {
             confessions={confessions}
             onAddConfession={handleAddConfession}
             onReactConfession={handleReactConfession}
+            nowPlayingTitle={radioState.currentShow?.nowPlaying?.title}
+            queue={playbackQueue}
+            onPlayNow={handlePlaySpecificTrack}
           />
         )}
 
@@ -475,6 +542,11 @@ export default function App() {
             auditions={auditions}
             onUpdateAuditions={handleUpdateAuditions}
             musicSubmissions={musicSubmissions}
+            queue={playbackQueue}
+            onPlayTrack={handlePlaySpecificTrack}
+            onQueueTrack={(track) => audioEngine.addToQueue(track, true)}
+            onRemoveFromQueue={(idx) => audioEngine.removeFromQueue(idx)}
+            onSkipNext={handleSkipNext}
             onExitAdmin={handleExitAdmin}
           />
         )}
@@ -485,6 +557,13 @@ export default function App() {
             radioState={radioState}
             isPlaying={isPlaying}
             onTogglePlay={handleTogglePlay}
+            currentTime={currentTime}
+            duration={duration}
+            onSeek={handleSeek}
+            onSkipNext={handleSkipNext}
+            onSkipPrev={handleSkipPrev}
+            queue={playbackQueue}
+            onPlayTrack={handlePlaySpecificTrack}
             isFavorite={isFavorite}
             onToggleFavorite={() => setIsFavorite(!isFavorite)}
             onClose={() => setActiveScreen('on-air')}
@@ -503,7 +582,10 @@ export default function App() {
             <MiniPlayer
               radioState={radioState}
               isPlaying={isPlaying}
+              currentTime={currentTime}
+              duration={duration}
               onTogglePlay={handleTogglePlay}
+              onSkipNext={handleSkipNext}
               onExpand={() => setActiveScreen('player')}
               isFavorite={isFavorite}
               onToggleFavorite={() => setIsFavorite(!isFavorite)}

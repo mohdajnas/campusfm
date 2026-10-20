@@ -93,17 +93,30 @@ export function OnAirScreen({
             {/* Currently Playing Track Bar */}
             <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center justify-between mt-1">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-[#e40468] flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-white text-[16px]">
-                    music_note
-                  </span>
-                </div>
+                {nowPlaying?.cover ? (
+                  <img
+                    src={nowPlaying.cover}
+                    alt={nowPlaying.title}
+                    className="w-10 h-10 rounded-xl object-cover shrink-0 shadow-xs border border-white/20"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-xl bg-[#e40468] flex items-center justify-center shrink-0 shadow-xs">
+                    <span className="material-symbols-outlined text-white text-[18px]">
+                      music_note
+                    </span>
+                  </div>
+                )}
                 <div className="min-w-0">
-                  <p className="text-[12px] font-extrabold text-white truncate leading-tight">
+                  <p className="text-[13px] font-black text-white truncate leading-tight">
                     {nowPlaying?.title}
                   </p>
-                  <p className="text-[10px] text-[#c5c0ff] truncate mt-0.5">
+                  <p className="text-[11px] text-[#c5c0ff] truncate mt-0.5">
                     {nowPlaying?.artist}
+                    {nowPlaying?.dedication && (
+                      <span className="text-[#ffdea8] font-bold ml-1.5">
+                        • 💌 For {nowPlaying.dedication.to}
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
