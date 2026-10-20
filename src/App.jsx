@@ -45,6 +45,7 @@ import {
   submitMusicToDb,
 } from './firebase/db'
 import { audioEngine } from './services/audioEngine'
+import { liveBroadcastService } from './services/liveBroadcastService'
 import { fetchBestMatch } from './services/musicService'
 import { Header } from './components/Header'
 import { Navbar } from './components/Navbar'
@@ -113,6 +114,13 @@ export default function App() {
   const [duration, setDuration] = useState(212)
   const [isFavorite, setIsFavorite] = useState(true)
 
+  // Live Studio Microphone / Voice Broadcast State
+  const [liveMicBroadcast, setLiveMicBroadcast] = useState({
+    isLive: false,
+    speaker: '',
+    show: '',
+  })
+
   // Admin authentication state (Strictly /admin only)
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false)
   const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(() => checkIsAdminRoute())
@@ -133,13 +141,10 @@ export default function App() {
       const isAdmin = checkIsAdminRoute()
       if (isAdmin) {
         setActiveScreen('admin')
-        if (!isAdminAuthenticated) {
-          setIsAdminLoginModalOpen(true)
-        }
-      } else if (activeScreen === 'admin') {
-        setActiveScreen('on-air')
+      } else {
         setIsAdminAuthenticated(false)
         setIsAdminLoginModalOpen(false)
+        setActiveScreen((prev) => (prev === 'admin' ? 'on-air' : prev))
       }
     }
 
@@ -150,7 +155,7 @@ export default function App() {
       window.removeEventListener('popstate', handleRouteCheck)
       window.removeEventListener('hashchange', handleRouteCheck)
     }
-  }, [isAdminAuthenticated, activeScreen])
+  }, [])
 
   // 1. Subscribe to real-time Firestore collections
   useEffect(() => {
@@ -192,6 +197,16 @@ export default function App() {
       unsubLF && unsubLF()
       unsubAud && unsubAud()
       unsubMusic && unsubMusic()
+    }
+  }, [])
+
+  // 1b. Subscribe to Real-Time RJ Live Microphone Speaking
+  useEffect(() => {
+    const unsubMic = liveBroadcastService.startListening((broadcastState) => {
+      setLiveMicBroadcast(broadcastState)
+    })
+    return () => {
+      if (unsubMic) unsubMic()
     }
   }, [])
 
@@ -556,6 +571,39 @@ export default function App() {
         />
       )}
 
+      {/* Student-Facing Live RJ Voice On-Air Floating Banner */}
+      {activeScreen !== 'admin' && liveMicBroadcast?.isLive && (
+        <aside
+          aria-label="Live Voice Broadcast Alert"
+          className="fixed top-14 left-0 right-0 z-40 px-4 max-w-md mx-auto pointer-events-none"
+        >
+          <div className="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white p-3 rounded-2xl shadow-2xl flex items-center justify-between gap-2.5 border border-white/20 pointer-events-auto">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-black/30 flex items-center justify-center shrink-0 animate-pulse">
+                <span className="material-symbols-outlined text-[19px] text-white">mic</span>
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-white/90">
+                    RJ Speaking Live On-Air
+                  </span>
+                </div>
+                <p className="text-[12px] font-black truncate text-white">
+                  {liveMicBroadcast.speaker || 'Central Studio RJ'} is broadcasting live
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1 shrink-0 bg-black/40 px-2.5 py-1 rounded-xl">
+              <span className="w-1 h-3.5 bg-white rounded-full animate-bounce"></span>
+              <span className="w-1 h-5 bg-white rounded-full animate-bounce [animation-delay:150ms]"></span>
+              <span className="w-1 h-2.5 bg-white rounded-full animate-bounce [animation-delay:300ms]"></span>
+            </div>
+          </div>
+        </aside>
+      )}
+
       {/* Main Content Viewport */}
       <main
         className={
@@ -705,6 +753,7 @@ export default function App() {
             onOpenEqualizer={() => setIsEqualizerOpen(true)}
             onOpenRequestModal={() => setActiveScreen('community')}
             sleepMinutes={sleepMinutes}
+            liveMicBroadcast={liveMicBroadcast}
           />
         )}
       </main>
@@ -723,6 +772,7 @@ export default function App() {
               onExpand={() => setActiveScreen('player')}
               isFavorite={isFavorite}
               onToggleFavorite={() => setIsFavorite(!isFavorite)}
+              liveMicBroadcast={liveMicBroadcast}
             />
           </div>
         </div>

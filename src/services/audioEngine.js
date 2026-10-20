@@ -134,8 +134,26 @@ class AudioEngine {
 
   setVolume(vol) {
     this.volume = Math.max(0, Math.min(1, vol))
-    this.audio.volume = this.volume
-    youtubeAudio.setVolume(this.volume)
+    if (!this.isDucked) {
+      this.audio.volume = this.volume
+      youtubeAudio.setVolume(this.volume)
+    }
+    this.notify()
+  }
+
+  /**
+   * Smoothly ducks or restores background music when an RJ speaks live on mic
+   */
+  duckAudio(duck = true, duckLevel = 0.12) {
+    this.isDucked = duck
+    if (duck) {
+      const lowered = Math.max(0.04, Math.min(this.volume, duckLevel))
+      this.audio.volume = lowered
+      youtubeAudio.setVolume(lowered)
+    } else {
+      this.audio.volume = this.volume
+      youtubeAudio.setVolume(this.volume)
+    }
     this.notify()
   }
 

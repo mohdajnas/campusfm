@@ -10,18 +10,38 @@ export function MiniPlayer({
   onExpand,
   isFavorite,
   onToggleFavorite,
+  liveMicBroadcast,
 }) {
   const currentShow = radioState?.currentShow
   const nowPlaying = currentShow?.nowPlaying
   const dedication = nowPlaying?.dedication
   const progressPercent = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0
+  const isMicLive = Boolean(liveMicBroadcast?.isLive)
 
   return (
     <aside aria-label="Campus Radio Mini Player" className="w-full max-w-md mx-auto px-4 mb-2 z-30">
       <div
         onClick={onExpand}
-        className="bg-[#1c1c1e] text-white rounded-[24px] shadow-[0_18px_38px_rgba(0,0,0,0.65)] flex flex-col cursor-pointer active:scale-[0.99] transition-all hover:border-white/[0.15] border border-white/[0.08] overflow-hidden relative"
+        className={`text-white rounded-[24px] shadow-[0_18px_38px_rgba(0,0,0,0.65)] flex flex-col cursor-pointer active:scale-[0.99] transition-all border overflow-hidden relative ${
+          isMicLive
+            ? 'bg-[#221616] border-red-500/50 shadow-[0_0_25px_rgba(239,68,68,0.3)] ring-1 ring-red-500/30'
+            : 'bg-[#1c1c1e] hover:border-white/[0.15] border-white/[0.08]'
+        }`}
       >
+        {/* Live RJ Microphone Speaking Bar (if active) */}
+        {isMicLive && (
+          <div className="bg-gradient-to-r from-red-600 to-rose-600 px-3 py-1 flex items-center justify-between text-[10px] font-black text-white">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+              <span className="material-symbols-outlined text-[13px]">mic</span>
+              <span className="truncate">RJ LIVE: {liveMicBroadcast.speaker || 'Central Studio'}</span>
+            </div>
+            <span className="text-[8.5px] uppercase tracking-wider bg-black/40 px-1.5 py-0.2 rounded font-mono">
+              Voice Ducking ON
+            </span>
+          </div>
+        )}
+
         <div className="p-3.5 flex items-center justify-between">
           {/* Left: Track Cover / Station Avatar & Info */}
           <div className="flex items-center space-x-3 min-w-0 flex-1 pr-2">
@@ -30,9 +50,9 @@ export function MiniPlayer({
                 <img
                   src={nowPlaying.cover}
                   alt={nowPlaying.title}
-                  className={`w-11 h-11 rounded-xl object-cover shadow-md border border-white/10 ${
-                    isPlaying ? 'animate-spin-slow' : ''
-                  }`}
+                  className={`w-11 h-11 rounded-xl object-cover shadow-md border ${
+                    isMicLive ? 'border-red-500 ring-2 ring-red-500/50' : 'border-white/10'
+                  } ${isPlaying ? 'animate-spin-slow' : ''}`}
                   onError={(e) => {
                     e.currentTarget.onerror = null
                     e.currentTarget.src =

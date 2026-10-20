@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import confetti from 'canvas-confetti'
 import { seedCampusDataToFirestore } from '../firebase/db'
 import { fetchBestMatch } from '../services/musicService'
+import { liveBroadcastService } from '../services/liveBroadcastService'
 
 export function AdminScreen({
   radioState,
@@ -51,6 +52,69 @@ export function AdminScreen({
   const [evDate, setEvDate] = useState('')
   const [evVenue, setEvVenue] = useState('')
   const [evDesc, setEvDesc] = useState('')
+
+  // Live Microphone / Speaking provision
+  const [isMicLive, setIsMicLive] = useState(false)
+  const [micLevel, setMicLevel] = useState(0)
+  const [isMicConnecting, setIsMicConnecting] = useState(false)
+  const [micDuration, setMicDuration] = useState(0)
+  const [micError, setMicError] = useState('')
+  const [duckMusic, setDuckMusic] = useState(true)
+  const [speakingRj, setSpeakingRj] = useState(showRj || 'RJ Farhan')
+
+  useEffect(() => {
+    liveBroadcastService.onMicLevel((lvl) => {
+      setMicLevel(lvl)
+    })
+  }, [])
+
+  useEffect(() => {
+    let timer = null
+    if (isMicLive) {
+      setMicDuration(0)
+      timer = setInterval(() => {
+        setMicDuration((prev) => prev + 1)
+      }, 1000)
+    } else {
+      setMicDuration(0)
+    }
+    return () => {
+      if (timer) clearInterval(timer)
+    }
+  }, [isMicLive])
+
+  const handleToggleLiveMic = async () => {
+    if (isMicLive) {
+      await liveBroadcastService.stopBroadcasting()
+      setIsMicLive(false)
+    } else {
+      setIsMicConnecting(true)
+      setMicError('')
+      try {
+        await liveBroadcastService.startBroadcasting({
+          rjName: speakingRj || showRj || 'RJ Farhan',
+          showTitle: showTitle || 'Live Campus Broadcast',
+          duck: duckMusic,
+        })
+        setIsMicLive(true)
+      } catch (err) {
+        console.error('Failed to start microphone broadcast:', err)
+        setMicError('Could not access microphone. Please allow microphone permissions in your browser.')
+      } finally {
+        setIsMicConnecting(false)
+      }
+    }
+  }
+
+  const handleSoundEffect = (sfx) => {
+    liveBroadcastService.triggerSoundEffect(sfx)
+  }
+
+  const formatMicTimer = (sec) => {
+    const m = Math.floor(sec / 60)
+    const s = sec % 60
+    return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`
+  }
 
   // Seeding trigger
   const handleSeedDatabase = async () => {
@@ -376,6 +440,201 @@ export function AdminScreen({
       {/* SECTION 1: Studio Live Controller */}
       {activeAdminTab === 'studio' && (
         <div className="px-4 mt-3 flex flex-col gap-3">
+          {/* Live Voice Broadcast & Microphone Studio Desk */}
+          <div
+            className={`p-4.5 rounded-[28px] border transition-all duration-300 shadow-xl flex flex-col gap-3.5 relative overflow-hidden ${
+              isMicLive
+                ? 'bg-[#1e1414] border-red-500/60 shadow-[0_0_35px_rgba(239,68,68,0.25)] ring-2 ring-red-500/30'
+                : 'bg-[#1c1c1e] border-white/[0.08]'
+            }`}
+          >
+            {/* Header / Status Banner */}
+            <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-7 h-7 rounded-xl flex items-center justify-center transition-colors ${
+                    isMicLive ? 'bg-red-500 text-white shadow-lg animate-pulse' : 'bg-white/10 text-white/60'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[17px]">
+                    {isMicLive ? 'mic' : 'mic_none'}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="text-[13px] font-black text-white leading-tight">
+                    Studio Voice Desk & Live Mic
+                  </h3>
+                  <p className="text-[9.5px] text-white/40">
+                    Broadcast your live voice directly to student listeners
+                  </p>
+                </div>
+              </div>
+
+              {/* Status Indicator Badge */}
+              <div
+                className={`px-2.5 py-1 rounded-full text-[9px] font-black tracking-wider uppercase flex items-center gap-1.5 transition-all ${
+                  isMicLive
+                    ? 'bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.6)] animate-pulse'
+                    : 'bg-white/10 text-white/60'
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    isMicLive ? 'bg-white animate-ping' : 'bg-white/40'
+                  }`}
+                ></span>
+                <span>{isMicLive ? 'ON-AIR SPEAKING' : 'STANDBY'}</span>
+              </div>
+            </div>
+
+            {/* Error Notification if mic access failed */}
+            {micError && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-2.5 flex items-start gap-2 text-red-400 text-[11px]">
+                <span className="material-symbols-outlined text-[16px] shrink-0 mt-0.5">error</span>
+                <span className="flex-1">{micError}</span>
+              </div>
+            )}
+
+            {/* Speaking Controls & Main Mic Button */}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-3">
+                {/* Large Push-To-Talk / Toggle Live Mic Button */}
+                <button
+                  type="button"
+                  onClick={handleToggleLiveMic}
+                  disabled={isMicConnecting}
+                  className={`flex-1 py-3.5 px-4 rounded-2xl font-black text-[12px] flex items-center justify-center gap-2.5 cursor-pointer active:scale-98 transition-all shadow-lg ${
+                    isMicLive
+                      ? 'bg-gradient-to-r from-red-600 to-rose-700 text-white shadow-red-600/40 hover:from-red-500 hover:to-rose-600 ring-2 ring-white/20'
+                      : 'bg-gradient-to-r from-[#ff7a00] to-amber-600 text-white shadow-[#ff7a00]/30 hover:from-[#ff8c1a] hover:to-amber-500'
+                  }`}
+                >
+                  {isMicConnecting ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      <span>CONNECTING MICROPHONE...</span>
+                    </>
+                  ) : isMicLive ? (
+                    <>
+                      <span className="material-symbols-outlined text-[20px] animate-pulse">mic_off</span>
+                      <span>MUTE & STOP BROADCAST</span>
+                      <span className="bg-black/40 px-2 py-0.5 rounded-md font-mono text-[11px] ml-1">
+                        {formatMicTimer(micDuration)}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[20px]">mic</span>
+                      <span>GO LIVE ON MIC (START SPEAKING)</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Real-Time VU Audio Level Decibel Meter */}
+              <div className="bg-[#141416] p-2.5 rounded-2xl border border-white/5 flex flex-col gap-1.5">
+                <div className="flex items-center justify-between text-[9.5px]">
+                  <span className="text-white/40 font-bold uppercase tracking-wider flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[12px]">graphic_eq</span>
+                    Microphone Input Level
+                  </span>
+                  <span className="font-mono text-white/70 font-bold">
+                    {isMicLive ? `${Math.round(micLevel)}%` : '0% (Muted)'}
+                  </span>
+                </div>
+
+                {/* 14-Segment VU Bar */}
+                <div className="flex items-center gap-1 h-3 w-full bg-black/60 rounded-lg p-0.5 border border-white/5">
+                  {Array.from({ length: 14 }).map((_, idx) => {
+                    const threshold = (idx + 1) * (100 / 14)
+                    const isActive = isMicLive && micLevel >= threshold
+                    let colorClass = 'bg-[#00d26a]' // Green safe level
+                    if (idx >= 10 && idx < 12) colorClass = 'bg-amber-400' // Amber warning level
+                    if (idx >= 12) colorClass = 'bg-red-500' // Peak / Red level
+
+                    return (
+                      <div
+                        key={idx}
+                        className={`flex-1 h-full rounded-xs transition-all duration-75 ${
+                          isActive ? `${colorClass} shadow-xs` : 'bg-white/10'
+                        }`}
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Speaker Configuration & Music Ducking Options */}
+              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <div className="bg-[#242426] p-2 rounded-xl border border-white/5 flex flex-col gap-1">
+                  <label className="text-[9px] uppercase tracking-wider text-white/40 font-bold">
+                    Speaking RJ Name
+                  </label>
+                  <input
+                    type="text"
+                    value={speakingRj}
+                    onChange={(e) => setSpeakingRj(e.target.value)}
+                    placeholder="e.g. RJ Farhan"
+                    className="bg-transparent text-white font-bold text-[11px] focus:outline-none"
+                  />
+                </div>
+
+                <div className="bg-[#242426] p-2 rounded-xl border border-white/5 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-[9.5px] font-bold text-white">Auto-Duck Music</span>
+                    <span className="text-[8px] text-white/40">Ducks songs to 12%</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDuckMusic(!duckMusic)}
+                    className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer ${
+                      duckMusic ? 'bg-[#00d26a]' : 'bg-white/20'
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
+                        duckMusic ? 'translate-x-4' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* Studio Soundboard (Live sound effects) */}
+              <div className="pt-2 border-t border-white/[0.08] flex flex-col gap-1.5">
+                <span className="text-[9px] uppercase tracking-wider text-white/40 font-bold">
+                  Live Studio Soundboard FX
+                </span>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSoundEffect('jingle')}
+                    className="py-1.5 px-2 bg-[#242426] hover:bg-[#2c2c2e] text-white rounded-xl text-[10px] font-bold border border-white/10 flex items-center justify-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
+                  >
+                    <span>🔔</span>
+                    <span className="truncate">Jingle</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSoundEffect('airhorn')}
+                    className="py-1.5 px-2 bg-[#242426] hover:bg-[#2c2c2e] text-amber-400 rounded-xl text-[10px] font-bold border border-white/10 flex items-center justify-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
+                  >
+                    <span>📢</span>
+                    <span className="truncate">Air Horn</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSoundEffect('applause')}
+                    className="py-1.5 px-2 bg-[#242426] hover:bg-[#2c2c2e] text-emerald-400 rounded-xl text-[10px] font-bold border border-white/10 flex items-center justify-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
+                  >
+                    <span>👏</span>
+                    <span className="truncate">Applause</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Live Audio Playback & Real-Time Queue Manager */}
           <div className="bg-[#1c1c1e] p-4.5 rounded-[28px] border border-white/[0.08] shadow-lg flex flex-col gap-3">
             <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">

@@ -19,6 +19,7 @@ export function PlayerModal({
   onOpenEqualizer,
   onOpenRequestModal,
   sleepMinutes,
+  liveMicBroadcast,
 }) {
   const [streamQuality, setStreamQuality] = useState('320k HD')
   const [trackLiked, setTrackLiked] = useState(false)
@@ -131,6 +132,22 @@ export function PlayerModal({
             )}
           </button>
         </div>
+
+        {/* Live RJ Microphone Speaking Alert Banner */}
+        {liveMicBroadcast?.isLive && (
+          <div className="w-full mb-3 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white py-2 px-3.5 rounded-2xl flex items-center justify-between text-[11px] font-black animate-pulse shadow-lg border border-white/20">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0"></span>
+              <span className="material-symbols-outlined text-[16px] shrink-0">mic</span>
+              <span className="truncate">
+                🎙️ LIVE RJ TALKING: {liveMicBroadcast.speaker || 'Central Studio'}
+              </span>
+            </div>
+            <span className="text-[9px] uppercase tracking-wider bg-black/40 px-2 py-0.5 rounded-md font-mono shrink-0">
+              Music Ducked
+            </span>
+          </div>
+        )}
 
         {/* Station Artwork Hero: Circular glowing disc with Album Artwork */}
         <div className="relative my-3 flex items-center justify-center">

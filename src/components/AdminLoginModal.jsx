@@ -14,7 +14,6 @@ export function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
     // Check station master key or standard credentials
     if (adminPassword === 'mesce108' || adminPassword === 'admin123' || adminPassword.length >= 6) {
       onLoginSuccess()
-      onClose()
     } else {
       setErrorMsg('Invalid Station Security Passkey. Use demo passkey: mesce108')
     }
@@ -23,7 +22,6 @@ export function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
   const handleQuickDemoLogin = () => {
     setAdminPassword('mesce108')
     onLoginSuccess()
-    onClose()
   }
 
   return (
