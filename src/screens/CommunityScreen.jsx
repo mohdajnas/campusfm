@@ -152,7 +152,7 @@ export function CommunityScreen({
       artist: selectedTrack ? selectedTrack.artist : (reqArtist.trim() || 'Campus Requested'),
       cover: selectedTrack?.cover,
       streamUrl: selectedTrack?.streamUrl,
-      duration: selectedTrack?.duration || 30,
+      duration: selectedTrack?.duration || 212,
       requester: isAnonReq ? 'Anonymous Student' : (reqName.trim() || 'Campus Listener'),
       dedicationTo: reqDedication.trim() || 'Campus Friends',
       message: reqMessage.trim() || 'Play this track on MESCE FM!',
@@ -866,7 +866,7 @@ export function CommunityScreen({
               </div>
 
               <div className="text-[10px] text-white/40 leading-tight">
-                🛡️ Note: Hate speech, harassment, or naming faculty disrespectfully will be automatically filtered and rejected by admins.
+                🛡️ Note: Hate speech, harassment, or naming faculty disrespectfully will be automatically filtered and rejected by student moderators.
               </div>
 
               <button

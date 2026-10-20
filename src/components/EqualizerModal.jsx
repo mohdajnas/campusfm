@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
 
 export function EqualizerModal({ isOpen, onClose }) {
-  if (!isOpen) return null
-
   const [preset, setPreset] = useState('Bass Boost')
   const [bands, setBands] = useState({
     '60Hz': 6,
@@ -11,6 +9,8 @@ export function EqualizerModal({ isOpen, onClose }) {
     '4kHz': 2,
     '12kHz': 5,
   })
+
+  if (!isOpen) return null
 
   const presets = {
     Flat: { '60Hz': 0, '250Hz': 0, '1kHz': 0, '4kHz': 0, '12kHz': 0 },

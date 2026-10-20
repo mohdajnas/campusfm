@@ -4,7 +4,7 @@ export function MiniPlayer({
   radioState,
   isPlaying,
   currentTime = 0,
-  duration = 30,
+  duration = 212,
   onTogglePlay,
   onSkipNext,
   onExpand,

@@ -5,7 +5,7 @@ export function PlayerModal({
   radioState,
   isPlaying,
   currentTime = 0,
-  duration = 30,
+  duration = 212,
   onSeek,
   onSkipNext,
   onSkipPrev,

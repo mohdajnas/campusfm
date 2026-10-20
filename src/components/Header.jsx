@@ -4,7 +4,6 @@ export function Header({
   currentScreen,
   onOpenNotifications,
   onOpenProfile,
-  isAdminActive,
 }) {
   const [notificationCount, setNotificationCount] = useState(1)
 
@@ -18,8 +17,6 @@ export function Header({
         return 'Campus Wire & Notices'
       case 'discover':
         return 'Music & Spotlights'
-      case 'admin':
-        return 'Studio Control Console'
       case 'player':
         return 'Live Audio Stream'
       default:

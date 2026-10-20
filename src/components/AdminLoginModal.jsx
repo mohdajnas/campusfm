@@ -100,6 +100,14 @@ export function AdminLoginModal({ isOpen, onClose, onLoginSuccess }) {
           >
             ⚡ One-Click Station Demo Login (Passkey: mesce108)
           </button>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full py-2 text-white/50 hover:text-white font-semibold text-[11px] transition-colors cursor-pointer text-center"
+          >
+            ← Return to Student Radio
+          </button>
         </form>
 
         <p className="text-[10px] text-center text-white/40">

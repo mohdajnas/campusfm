@@ -13,31 +13,33 @@ class YouTubeAudioService {
     this.onTimeUpdateCallback = null
     this.onEndedCallback = null
     this.onErrorCallback = null
-
-    this.loadAPI()
+    this.apiLoading = false
+    this.pendingTrack = null
   }
 
   loadAPI() {
     if (typeof window === 'undefined') return
+    if (this.apiLoading) return
+    this.apiLoading = true
 
     if (window.YT && window.YT.Player) {
       this.initPlayer()
       return
     }
 
-    if (!window.onYouTubeIframeAPIReady) {
-      window.onYouTubeIframeAPIReady = () => {
-        this.initPlayer()
-      }
+    const prevReady = window.onYouTubeIframeAPIReady
+    window.onYouTubeIframeAPIReady = () => {
+      if (typeof prevReady === 'function') prevReady()
+      this.initPlayer()
+    }
 
-      const tag = document.createElement('script')
-      tag.src = 'https://www.youtube.com/iframe_api'
-      const firstScriptTag = document.getElementsByTagName('script')[0]
-      if (firstScriptTag && firstScriptTag.parentNode) {
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
-      } else {
-        document.head.appendChild(tag)
-      }
+    const tag = document.createElement('script')
+    tag.src = 'https://www.youtube.com/iframe_api'
+    const firstScriptTag = document.getElementsByTagName('script')[0]
+    if (firstScriptTag && firstScriptTag.parentNode) {
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
+    } else {
+      document.head.appendChild(tag)
     }
   }
 
@@ -62,7 +64,6 @@ class YouTubeAudioService {
       this.player = new window.YT.Player('mesce-yt-audio-container', {
         height: '1',
         width: '1',
-        videoId: 'M7lc1UVf-VE', // Clean YouTube developer test embed
         playerVars: {
           autoplay: 0,
           controls: 0,
@@ -71,12 +72,18 @@ class YouTubeAudioService {
           modestbranding: 1,
           rel: 0,
           playsinline: 1,
-          origin: window.location.origin,
+          enablejsapi: 1,
+          origin: typeof window !== 'undefined' ? window.location.origin : '',
         },
         events: {
           onReady: (event) => {
             this.isReady = true
             event.target.setVolume(this.volume)
+            if (this.pendingTrack) {
+              const track = this.pendingTrack
+              this.pendingTrack = null
+              this.executePlay(track)
+            }
           },
           onStateChange: (event) => {
             this.handlePlayerStateChange(event.data)
@@ -147,13 +154,8 @@ class YouTubeAudioService {
     this.currentTrack = track
 
     if (!this.player || !this.isReady) {
-      // Re-attempt init if not yet ready
+      this.pendingTrack = track
       this.loadAPI()
-      setTimeout(() => {
-        if (this.player && typeof this.player.loadVideoById === 'function') {
-          this.executePlay(track)
-        }
-      }, 800)
       return
     }
 

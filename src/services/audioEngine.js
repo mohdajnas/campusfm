@@ -20,9 +20,9 @@ class AudioEngine {
     this.playlistIndex = 0
 
     this.currentTime = 0
-    this.duration = DEFAULT_MALAYALAM_PLAYLIST[0]?.duration || 193
+    this.duration = DEFAULT_MALAYALAM_PLAYLIST[0]?.duration || 212
     this.listeners = new Set()
-    this.activeEngine = 'youtube' // 'youtube' | 'html5'
+    this.activeEngine = 'html5' // 'html5' | 'youtube'
 
     this.isAdvancing = false
 
@@ -74,7 +74,12 @@ class AudioEngine {
     this.audio.addEventListener('timeupdate', () => {
       if (this.activeEngine === 'html5') {
         this.currentTime = this.audio.currentTime
-        if (this.audio.duration && !isNaN(this.audio.duration)) {
+        if (
+          this.audio.duration &&
+          !isNaN(this.audio.duration) &&
+          isFinite(this.audio.duration) &&
+          this.audio.duration > 35
+        ) {
           this.duration = this.audio.duration
         }
         this.notify()
@@ -149,8 +154,24 @@ class AudioEngine {
   /**
    * Starts playing a specific track in full length
    */
-  playTrack(track) {
+  async playTrack(track) {
     if (!track) return
+
+    // Auto-upgrade if track has an iTunes preview or duration <= 30
+    if (
+      !track.streamUrl ||
+      track.streamUrl.includes('AudioPreview') ||
+      (track.duration && track.duration <= 30)
+    ) {
+      try {
+        const full = await fetchBestMatch(track.title, track.artist)
+        if (full && full.streamUrl && !full.streamUrl.includes('AudioPreview')) {
+          track = { ...track, ...full, id: track.id || full.id }
+        }
+      } catch (err) {
+        console.warn('Track auto-upgrade note:', err)
+      }
+    }
 
     // Save previous to history
     if (this.currentTrack && this.currentTrack.id !== track.id) {
@@ -160,7 +181,7 @@ class AudioEngine {
 
     this.currentTrack = track
     this.currentTime = 0
-    this.duration = track.duration || 210
+    this.duration = track.duration || 212
 
     // Prefer high-fidelity direct audio stream for instantaneous, unblocked playback
     if (track.streamUrl) {

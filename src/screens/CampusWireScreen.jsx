@@ -242,7 +242,7 @@ export function CampusWireScreen({
               <span className="material-symbols-outlined text-[#00d26a] text-[20px]">check_circle</span>
               <div>
                 <p className="text-[12px] font-bold text-white">Event submitted successfully!</p>
-                <p className="text-[10px] text-white/60">Your event will appear after admin approval.</p>
+                <p className="text-[10px] text-white/60">Your event will appear after station review.</p>
               </div>
             </div>
           )}
@@ -526,7 +526,7 @@ export function CampusWireScreen({
               </div>
               <div>
                 <h3 className="text-[17px] font-black text-white">Submit an Event</h3>
-                <p className="text-[11px] text-white/60">Needs admin approval before publishing</p>
+                <p className="text-[11px] text-white/60">Reviewed by campus RJ team before publishing</p>
               </div>
             </div>
 
@@ -534,7 +534,7 @@ export function CampusWireScreen({
             <div className="bg-[#242426] border border-white/10 rounded-xl p-2.5 flex items-start gap-2">
               <span className="material-symbols-outlined text-[#ff7a00] text-[16px] mt-0.5">info</span>
               <p className="text-[10px] text-white/80 leading-snug">
-                Your event will be reviewed by the MESCE FM admin team. Once approved, it'll appear on the Campus Wire for all students.
+                Your event will be reviewed by the MESCE FM broadcast team. Once approved, it'll appear on the Campus Wire for all students.
               </p>
             </div>
 

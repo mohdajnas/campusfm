@@ -62,6 +62,20 @@ import { ProfileModal } from './components/ProfileModal'
 import { AuditionModal } from './components/AuditionModal'
 import { AdminLoginModal } from './components/AdminLoginModal'
 
+function checkIsAdminRoute() {
+  if (typeof window === 'undefined') return false
+  const path = window.location.pathname.toLowerCase().replace(/\/$/, '')
+  const hash = window.location.hash.toLowerCase()
+  const search = window.location.search.toLowerCase()
+  return (
+    path === '/admin' ||
+    path.startsWith('/admin') ||
+    hash === '#/admin' ||
+    hash === '#admin' ||
+    search.includes('admin=true')
+  )
+}
+
 export default function App() {
   // Radio broadcast state
   const [radioState, setRadioState] = useState(INITIAL_RADIO_STATE)
@@ -92,16 +106,16 @@ export default function App() {
   const [auditions, setAuditions] = useState(AUDITION_APPLICATIONS)
 
   // Navigation & audio state
-  const [activeScreen, setActiveScreen] = useState('on-air')
+  const [activeScreen, setActiveScreen] = useState(() => (checkIsAdminRoute() ? 'admin' : 'on-air'))
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackQueue, setPlaybackQueue] = useState([])
   const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(30)
+  const [duration, setDuration] = useState(212)
   const [isFavorite, setIsFavorite] = useState(true)
 
-  // Admin authentication state
+  // Admin authentication state (Strictly /admin only)
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false)
-  const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(false)
+  const [isAdminLoginModalOpen, setIsAdminLoginModalOpen] = useState(() => checkIsAdminRoute())
 
   // Modals state
   const [isSleepTimerOpen, setIsSleepTimerOpen] = useState(false)
@@ -113,13 +127,30 @@ export default function App() {
 
   const sleepTimerRef = useRef(null)
 
-  // Check URL parameters for standalone admin route (e.g. ?admin=true or #admin)
+  // Strict route listener: /admin only activates for admin/RJ route
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('admin') === 'true' || window.location.hash === '#admin') {
-      setIsAdminLoginModalOpen(true)
+    const handleRouteCheck = () => {
+      const isAdmin = checkIsAdminRoute()
+      if (isAdmin) {
+        setActiveScreen('admin')
+        if (!isAdminAuthenticated) {
+          setIsAdminLoginModalOpen(true)
+        }
+      } else if (activeScreen === 'admin') {
+        setActiveScreen('on-air')
+        setIsAdminAuthenticated(false)
+        setIsAdminLoginModalOpen(false)
+      }
     }
-  }, [])
+
+    handleRouteCheck()
+    window.addEventListener('popstate', handleRouteCheck)
+    window.addEventListener('hashchange', handleRouteCheck)
+    return () => {
+      window.removeEventListener('popstate', handleRouteCheck)
+      window.removeEventListener('hashchange', handleRouteCheck)
+    }
+  }, [isAdminAuthenticated, activeScreen])
 
   // 1. Subscribe to real-time Firestore collections
   useEffect(() => {
@@ -170,7 +201,7 @@ export default function App() {
       setIsPlaying(state.isPlaying)
       setPlaybackQueue(state.queue || [])
       setCurrentTime(state.currentTime || 0)
-      setDuration(state.duration || 30)
+      setDuration(state.duration || 212)
 
       if (state.currentTrack) {
         setRadioState((prev) => ({
@@ -242,20 +273,24 @@ export default function App() {
       artist: podcast.host,
       album: 'MESCE FM Podcast Archive',
       cover: podcast.cover,
-      streamUrl: podcast.streamUrl || 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/4a/12/58/4a125867-248d-cefe-7917-862d2579dfd9/mzaf_16259021469113642777.plus.aac.p.m4a',
-      duration: 180,
+      streamUrl: podcast.streamUrl || 'https://ice2.somafm.com/groovesalad-128-mp3',
+      duration: 1440,
     })
   }
 
-  const handlePlayTrack = (track) => {
+  const handlePlayTrack = async (track) => {
+    if (track.streamUrl && !track.streamUrl.includes('AudioPreview') && track.duration > 30) {
+      audioEngine.playTrack(track)
+      return
+    }
+    const resolved = await fetchBestMatch(track.title, track.artist)
     audioEngine.playTrack({
-      id: track.id || `track-${Date.now()}`,
-      title: track.title,
-      artist: track.artist,
-      album: track.album || 'Student Showcase',
-      cover: track.cover || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
-      streamUrl: track.streamUrl || 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/43/a0/da/43a0daa2-504d-6b7c-c63a-0c8864608a6d/mzaf_7754996064757215177.plus.aac.p.m4a',
-      duration: 30,
+      ...resolved,
+      id: track.id || resolved.id,
+      title: track.title || resolved.title,
+      artist: track.artist || resolved.artist,
+      album: track.album || resolved.album,
+      cover: track.cover || resolved.cover,
     })
   }
 
@@ -273,14 +308,14 @@ export default function App() {
   const handleAddSongRequest = async (req) => {
     // 1. Resolve full playable track metadata and stream URL
     let resolved = null
-    if (req.streamUrl) {
+    if (req.streamUrl && !req.streamUrl.includes('AudioPreview')) {
       resolved = {
         id: `req-${Date.now()}`,
         title: req.songTitle,
         artist: req.artist,
         cover: req.cover,
         streamUrl: req.streamUrl,
-        duration: req.duration || 30,
+        duration: req.duration || 212,
       }
     } else {
       const match = await fetchBestMatch(req.songTitle, req.artist)
@@ -485,32 +520,50 @@ export default function App() {
     }
   }
 
-  // Admin Auth Handlers
+  // Admin Auth Handlers (Strictly accessed via /admin)
   const handleAdminLoginSuccess = () => {
     setIsAdminAuthenticated(true)
+    setIsAdminLoginModalOpen(false)
     setActiveScreen('admin')
+    if (!checkIsAdminRoute()) {
+      try {
+        window.history.pushState({}, document.title, '/admin')
+      } catch {
+        window.location.hash = '#/admin'
+      }
+    }
   }
 
   const handleExitAdmin = () => {
     setIsAdminAuthenticated(false)
+    setIsAdminLoginModalOpen(false)
     setActiveScreen('on-air')
-    if (window.location.search.includes('admin') || window.location.hash.includes('admin')) {
-      window.history.replaceState({}, document.title, window.location.pathname)
+    try {
+      window.history.pushState({}, document.title, '/')
+    } catch {
+      window.location.hash = ''
     }
   }
 
   return (
     <div className="bg-white text-neutral-900 min-h-screen flex flex-col font-sans relative selection:bg-[#ff7a00] selection:text-black">
-      {/* Top Header (Clean student view without admin buttons) */}
-      <Header
-        currentScreen={activeScreen}
-        onOpenNotifications={() => setIsNotificationsOpen(true)}
-        onOpenProfile={() => setIsProfileOpen(true)}
-        isAdminActive={activeScreen === 'admin'}
-      />
+      {/* Top Header (Clean student view; hidden on admin console) */}
+      {activeScreen !== 'admin' && (
+        <Header
+          currentScreen={activeScreen}
+          onOpenNotifications={() => setIsNotificationsOpen(true)}
+          onOpenProfile={() => setIsProfileOpen(true)}
+        />
+      )}
 
       {/* Main Content Viewport */}
-      <main className="flex-1 flex flex-col relative w-full pt-16 pb-28 max-w-md mx-auto">
+      <main
+        className={
+          activeScreen === 'admin'
+            ? 'flex-1 flex flex-col relative w-full pb-10 max-w-md mx-auto'
+            : 'flex-1 flex flex-col relative w-full pt-16 pb-28 max-w-md mx-auto'
+        }
+      >
         {/* Screen 1: On Air */}
         {activeScreen === 'on-air' && (
           <OnAirScreen
@@ -572,34 +625,65 @@ export default function App() {
           />
         )}
 
-        {/* Screen 5: Standalone Studio Admin (Accessible only via login) */}
-        {activeScreen === 'admin' && isAdminAuthenticated && (
-          <AdminScreen
-            radioState={radioState}
-            onUpdateRadioState={handleUpdateRadioState}
-            shows={shows}
-            onUpdateShows={setShows}
-            songRequests={songRequests}
-            onUpdateSongRequests={handleUpdateSongRequests}
-            confessions={confessions}
-            onUpdateConfessions={handleUpdateConfessions}
-            events={events}
-            onAddEvent={handleAddEvent}
-            onApproveEvent={handleApproveEvent}
-            onRejectEvent={handleRejectEvent}
-            lostAndFound={lostAndFound}
-            onUpdateLostAndFound={handleUpdateLostAndFound}
-            auditions={auditions}
-            onUpdateAuditions={handleUpdateAuditions}
-            musicSubmissions={musicSubmissions}
-            queue={playbackQueue}
-            onPlayTrack={handlePlaySpecificTrack}
-            onQueueTrack={(track) => audioEngine.addToQueue(track, true)}
-            onRemoveFromQueue={(idx) => audioEngine.removeFromQueue(idx)}
-            onSkipNext={handleSkipNext}
-            onExitAdmin={handleExitAdmin}
-          />
-        )}
+        {/* Screen 5: Standalone Studio Admin (Strictly /admin only) */}
+        {activeScreen === 'admin' &&
+          (isAdminAuthenticated ? (
+            <AdminScreen
+              radioState={radioState}
+              onUpdateRadioState={handleUpdateRadioState}
+              shows={shows}
+              onUpdateShows={setShows}
+              songRequests={songRequests}
+              onUpdateSongRequests={handleUpdateSongRequests}
+              confessions={confessions}
+              onUpdateConfessions={handleUpdateConfessions}
+              events={events}
+              onAddEvent={handleAddEvent}
+              onApproveEvent={handleApproveEvent}
+              onRejectEvent={handleRejectEvent}
+              lostAndFound={lostAndFound}
+              onUpdateLostAndFound={handleUpdateLostAndFound}
+              auditions={auditions}
+              onUpdateAuditions={handleUpdateAuditions}
+              musicSubmissions={musicSubmissions}
+              queue={playbackQueue}
+              onPlayTrack={handlePlaySpecificTrack}
+              onQueueTrack={(track) => audioEngine.addToQueue(track, true)}
+              onRemoveFromQueue={(idx) => audioEngine.removeFromQueue(idx)}
+              onSkipNext={handleSkipNext}
+              onExitAdmin={handleExitAdmin}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center p-6 text-center my-auto min-h-[70vh]">
+              <div className="w-16 h-16 rounded-3xl bg-[#1c1c1e] border border-white/10 text-[#ff7a00] flex items-center justify-center mb-4 shadow-xl">
+                <span className="material-symbols-outlined text-[32px]">lock</span>
+              </div>
+              <span className="px-3 py-1 rounded-full bg-[#ff7a00]/15 text-[#ff7a00] text-[11px] font-black uppercase tracking-wider mb-2 border border-[#ff7a00]/30">
+                Restricted Station Area
+              </span>
+              <h2 className="text-xl font-black text-neutral-900">
+                MESCE FM 108.1 Studio Console
+              </h2>
+              <p className="text-xs text-neutral-600 max-w-xs mt-1.5 leading-relaxed">
+                This portal is reserved strictly for faculty station directors, technical crew, and
+                student RJs on-air.
+              </p>
+              <div className="flex flex-col gap-2.5 mt-6 w-full max-w-xs">
+                <button
+                  onClick={() => setIsAdminLoginModalOpen(true)}
+                  className="w-full py-3 bg-[#ff7a00] hover:bg-[#ff8c1a] text-black font-extrabold text-[13px] rounded-2xl shadow-lg transition-all active:scale-95 cursor-pointer"
+                >
+                  Sign In to Studio Console
+                </button>
+                <button
+                  onClick={handleExitAdmin}
+                  className="w-full py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold text-xs rounded-2xl border border-neutral-200 transition-colors cursor-pointer"
+                >
+                  ← Back to Student Radio
+                </button>
+              </div>
+            </div>
+          ))}
 
         {/* Screen 6: Full Player Modal */}
         {activeScreen === 'player' && (
@@ -672,7 +756,6 @@ export default function App() {
       <ProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
-        onOpenAdminLogin={() => setIsAdminLoginModalOpen(true)}
       />
 
       <AuditionModal
@@ -681,10 +764,10 @@ export default function App() {
         onSubmitAudition={handleSubmitAudition}
       />
 
-      {/* Standalone Admin Login Gate */}
+      {/* Standalone Admin Login Gate (Triggered strictly on /admin) */}
       <AdminLoginModal
         isOpen={isAdminLoginModalOpen}
-        onClose={() => setIsAdminLoginModalOpen(false)}
+        onClose={handleExitAdmin}
         onLoginSuccess={handleAdminLoginSuccess}
       />
     </div>

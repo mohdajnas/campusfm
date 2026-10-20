@@ -1,27 +1,28 @@
 // Music Search & Resolver Service for MESCE FM 108.1
-// Full-length (3-5+ minute) song playback engine with HD artwork and queue integration.
+// Full-length (3-8+ minute) song playback engine with HD artwork and queue integration.
+import CryptoJS from 'crypto-js'
 
 export const POPULAR_MALAYALAM_YOUTUBE_MAP = {
-  'illuminati': { id: 'tOM-nWPcR4U', duration: 193 },
-  'kuthanthram': { id: 'YkVprVT04OA', duration: 185 },
-  'cherathukal': { id: 'JukNAg7bz6I', duration: 225 },
-  'manavalan thug': { id: '_eWvDaztcjI', duration: 210 },
-  'manavaalan thug': { id: '_eWvDaztcjI', duration: 210 },
-  'darshana': { id: 'B-pNp0LUV2Y', duration: 250 },
-  'aadharanjali': { id: 'yvPspB0p83E', duration: 200 },
-  'nada nada': { id: '0yZ5x3bQoJg', duration: 255 },
-  'fish rock': { id: 'y4qHn-j3l4k', duration: 230 },
-  'malare': { id: '0G2VxhV_g10', duration: 250 },
-  'jimikki kammal': { id: 'FXiaIH49oAU', duration: 205 },
-  'pala palli': { id: '1C_w_f81g7k', duration: 220 },
-  'yellow': { id: 'yKNxeF4KMsY', duration: 269 },
-  'kun faya kun': { id: 'T94PHkuydcw', duration: 470 },
-  'neela nilave': { id: 'B3eam3427u8', duration: 200 },
-  'kanmani anbodu': { id: 'qY8k2G4c9vA', duration: 330 },
-  'jaada': { id: 'Y9_bF0xL3z4', duration: 210 },
-  'armadham': { id: 'X4w5eQ10q7I', duration: 195 },
-  'chekele': { id: 'eCgQ3jY2YFk', duration: 240 },
-  'navarasam': { id: '2Vv-BfVoq4g', duration: 290 },
+  illuminati: { id: 'tOM-nWPcR4U', duration: 212 },
+  kuthanthram: { id: 'YkVprVT04OA', duration: 240 },
+  cherathukal: { id: 'JukNAg7bz6I', duration: 221 },
+  'manavalan thug': { id: '_eWvDaztcjI', duration: 200 },
+  'manavaalan thug': { id: '_eWvDaztcjI', duration: 200 },
+  darshana: { id: 'B-pNp0LUV2Y', duration: 225 },
+  aadharanjali: { id: 'yvPspB0p83E', duration: 149 },
+  'nada nada': { id: '0yZ5x3bQoJg', duration: 304 },
+  'fish rock': { id: 'y4qHn-j3l4k', duration: 259 },
+  malare: { id: '0G2VxhV_g10', duration: 316 },
+  'jimikki kammal': { id: 'FXiaIH49oAU', duration: 200 },
+  'pala palli': { id: '1C_w_f81g7k', duration: 270 },
+  yellow: { id: 'yKNxeF4KMsY', duration: 266 },
+  'kun faya kun': { id: 'T94PHkuydcw', duration: 469 },
+  'neela nilave': { id: 'B3eam3427u8', duration: 253 },
+  'kanmani anbodu': { id: 'qY8k2G4c9vA', duration: 327 },
+  jaada: { id: 'Y9_bF0xL3z4', duration: 162 },
+  armadham: { id: 'X4w5eQ10q7I', duration: 173 },
+  chekele: { id: 'eCgQ3jY2YFk', duration: 301 },
+  navarasam: { id: '2Vv-BfVoq4g', duration: 394 },
 }
 
 export const DEFAULT_ALBUM_COVER =
@@ -33,10 +34,10 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Illuminati (From "Aavesham")',
     artist: 'Sushin Shyam, Dabzee & Vinayak Sasikumar',
     album: 'Aavesham (Original Motion Picture Soundtrack)',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/88/4e/29/884e290c-29ed-25d5-7b25-243b89097220/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/43/a0/da/43a0daa2-504d-6b7c-c63a-0c8864608a6d/mzaf_7754996064757215177.plus.aac.p.m4a',
+    cover: 'https://c.saavncdn.com/202/Aavesham-Original-Motion-Picture-Soundtrack-Malayalam-2024-20250910150630-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/202/ba6006006a2f40e6b20b5ced32cc2885_320.mp4',
     youtubeId: 'tOM-nWPcR4U',
-    duration: 193, // Full 3 mins 13 secs
+    duration: 212, // Full 3 mins 32 secs
     genre: 'Malayalam Hip-Hop / Ost',
   },
   {
@@ -44,10 +45,10 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Kuthanthram',
     artist: 'Sushin Shyam & Vedan',
     album: 'Manjummel Boys (Original Motion Picture Soundtrack)',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/70/f8/ae/70f8ae0d-aadf-6ec8-1a1c-2d83e26ff6dc/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/94/7f/aa/947faa2a-b558-2b1c-4ad0-1afc90352607/mzaf_2643013271292698405.plus.aac.p.m4a',
+    cover: 'https://c.saavncdn.com/934/Manjummel-Boys-Original-Motion-Picture-Soundtrack-Malayalam-2024-20250905071140-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/934/a907bd3ca1d14ac2b04b7ab10a0ddcd1_320.mp4',
     youtubeId: 'YkVprVT04OA',
-    duration: 185, // Full 3 mins 5 secs
+    duration: 240, // Full 4 mins
     genre: 'Malayalam Indie Rap',
   },
   {
@@ -55,10 +56,10 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Cherathukal (From "Kumbalangi Nights")',
     artist: 'Sushin Shyam & Sithara Krishnakumar',
     album: 'Kumbalangi Nights',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/ff/e5/09/ffe50919-e001-3e56-bc3f-09a4ce474175/8904337228118.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/98/77/74/98777452-8183-7f08-1f68-df2a44b881bf/mzaf_16122855687462731475.plus.aac.p.m4a',
+    cover: 'https://c.saavncdn.com/993/Kumbalangi-Nights-Malayalam-2019-20260210193755-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/993/84d3c0a7f13ef6091b16a9c31c5540b2_320.mp4',
     youtubeId: 'JukNAg7bz6I',
-    duration: 225, // Full 3 mins 45 secs
+    duration: 221, // Full 3 mins 41 secs
     genre: 'Acoustic Melody',
   },
   {
@@ -66,10 +67,10 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Manavaalan Thug (From "Thallumaala")',
     artist: 'Dabzee & S.A.',
     album: 'Thallumaala (Original Motion Picture Soundtrack)',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/cd/4a/c2/cd4ac279-7384-5ea1-7dd4-716f20d2c837/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/c0/a0/3c/c0a03c03-95fe-b8b8-5fef-8ed44a1a397e/mzaf_1993834899372910272.plus.aac.p.m4a',
+    cover: 'https://c.saavncdn.com/017/Thallumaala-Malayalam-2022-20230110143259-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/017/19451f6bde7e61ee8753387543e4633b_320.mp4',
     youtubeId: '_eWvDaztcjI',
-    duration: 210, // Full 3 mins 30 secs
+    duration: 200, // Full 3 mins 20 secs
     genre: 'Campus Hype / Rap',
   },
   {
@@ -77,10 +78,10 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Darshana (From "Hridayam")',
     artist: 'Hesham Abdul Wahab & Darshana Rajendran',
     album: 'Hridayam (Original Soundtrack)',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/69/26/34/6926341a-b85f-f853-de47-cb6fa81544aa/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/2b/71/38/2b71380d-0114-3845-c3a8-5d2cfb9abfae/mzaf_14430613370529957448.plus.aac.p.m4a',
+    cover: 'https://c.saavncdn.com/555/Hridayam-Side-A-Malayalam-2022-20230803211029-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/555/dd42c3e603cb40b91cc2ddd03ae6a499_320.mp4',
     youtubeId: 'B-pNp0LUV2Y',
-    duration: 250, // Full 4 mins 10 secs
+    duration: 225, // Full 3 mins 45 secs
     genre: 'College Romance / Indie',
   },
   {
@@ -88,10 +89,10 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Aadharanjali (From "Romancham")',
     artist: 'Sushin Shyam, Madhuvanthi Narayan & Vinayak Sasikumar',
     album: 'Romancham (Original Motion Picture Soundtrack)',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/2f/d5/ed/2fd5edd0-82fa-1ffe-ac19-e3cadffc9531/197188225889.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/55/95/3b/55953b56-368d-a2d2-c14d-54acb5783d7a/mzaf_12505579229243410349.plus.aac.p.m4a',
+    cover: 'https://c.saavncdn.com/453/Romancham-Malayalam-2023-20230216173246-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/453/9b96c77723afa9b9595f0e9c6d93cd65_sar_320.mp4',
     youtubeId: 'yvPspB0p83E',
-    duration: 200, // Full 3 mins 20 secs
+    duration: 149, // Full 2 mins 29 secs
     genre: 'Quirky Campus Beat',
   },
   {
@@ -99,10 +100,10 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Nada Nada',
     artist: 'Avial',
     album: 'Avial',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/19/c6/17/19c61763-956a-2189-7da8-e9ad92b1eab3/3616845678792.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/c8/e1/6a/c8e16a60-c729-dca9-ffe7-42b277b8a0d1/mzaf_692850314876616037.plus.aac.p.m4a',
+    cover: 'https://c.saavncdn.com/792/Avial-Malayalam-2008-20260224032408-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/792/11549c171cabda46db592bbdbfb27b0e_320.mp4',
     youtubeId: '0yZ5x3bQoJg',
-    duration: 255, // Full 4 mins 15 secs
+    duration: 304, // Full 5 mins 4 secs
     genre: 'Malayalam Rock / Cult Classic',
   },
   {
@@ -110,10 +111,10 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Fish Rock',
     artist: 'Thaikkudam Bridge',
     album: 'Navarasam',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/8f/eb/2a/8feb2a8d-c940-f18f-fa3e-f721adb07362/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/ad/63/48/ad6348be-b5da-9ffd-fa4d-63a3dd5558cd/mzaf_2646962926773142674.plus.aac.p.m4a',
+    cover: 'https://c.saavncdn.com/738/Fish-Rock-Malayalam-2022-20220204132408-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/738/eee2c5b706f0e9c69986452ec1910086_320.mp4',
     youtubeId: 'y4qHn-j3l4k',
-    duration: 230, // Full 3 mins 50 secs
+    duration: 259, // Full 4 mins 19 secs
     genre: 'Prog Fusion / Fest Anthem',
   },
   {
@@ -121,10 +122,10 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Malare (From "Premam")',
     artist: 'Vijay Yesudas & Rajesh Murugesan',
     album: 'Premam (Original Motion Picture Soundtrack)',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music2/v4/6f/3c/cd/6f3ccd36-2a0f-0c4e-ce51-5aebcf9e9f84/cover.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/41/59/b4/4159b41b-708b-8140-d758-e8da1ed7bedd/mzaf_7080443034849106781.plus.aac.p.m4a',
+    cover: 'https://c.saavncdn.com/665/Premam-Malayalam-2015-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/665/64fe9e59b56dfb5f644e9e461923979b_320.mp4',
     youtubeId: '0G2VxhV_g10',
-    duration: 250, // Full 4 mins 10 secs
+    duration: 316, // Full 5 mins 16 secs
     genre: 'Evergreen Romantic Melody',
   },
   {
@@ -132,121 +133,305 @@ export const DEFAULT_MALAYALAM_PLAYLIST = [
     title: 'Entammede Jimikki Kammal',
     artist: 'Shaan Rahman, Vineeth Sreenivasan & Renjith Unni',
     album: 'Velipadinte Pusthakam',
-    cover: 'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/02/1b/0b/021b0b88-cd86-3669-2202-e0353e9942fb/840920109205.jpg/600x600bb.jpg',
-    streamUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/91/81/f0/9181f09d-0d2c-6fc1-8c1e-18f27f04c979/mzaf_9189549283050732545.plus.aac.p.m4a',
+    cover: 'https://c.saavncdn.com/205/Velipadinte-Pusthakam-Malayalam-2024-20250425150549-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/205/88eef06ed9b065b5c1760511b181f760_320.mp4',
     youtubeId: 'FXiaIH49oAU',
-    duration: 205, // Full 3 mins 25 secs
+    duration: 200, // Full 3 mins 20 secs
     genre: 'College Flashmob Anthem',
+  },
+  {
+    id: 'mesce-track-11',
+    title: 'Pala Palli (From "Kaduva")',
+    artist: 'Jakes Bejoy & Athul Narukara',
+    album: 'Kaduva',
+    cover: 'https://c.saavncdn.com/930/Kaduva-Malayalam-2022-20260812211736-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/930/7c970f3702067cc5345ea1f09ca47cfd_320.mp4',
+    youtubeId: '1C_w_f81g7k',
+    duration: 270, // Full 4 mins 30 secs
+    genre: 'High Voltage Folk Beat',
+  },
+  {
+    id: 'mesce-track-12',
+    title: 'Yellow',
+    artist: 'Coldplay',
+    album: 'Parachutes',
+    cover: 'https://c.saavncdn.com/254/Parachutes-English-2000-20240529104717-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/254/6ebc38a6a7ea892f3a27cd66c71529d6_320.mp4',
+    youtubeId: 'yKNxeF4KMsY',
+    duration: 266, // Full 4 mins 26 secs
+    genre: 'British Alt-Rock',
+  },
+  {
+    id: 'mesce-track-13',
+    title: 'Kun Faya Kun (From "Rockstar")',
+    artist: 'A.R. Rahman, Javed Ali & Mohit Chauhan',
+    album: 'Rockstar',
+    cover: 'https://c.saavncdn.com/179/World-Music-Day-Best-Of-Bollywood-Hits-Hindi-2026-20260622111029-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/179/53fd6b97b1616b941b115f840e8b1e42_320.mp4',
+    youtubeId: 'T94PHkuydcw',
+    duration: 469, // Full 7 mins 49 secs
+    genre: 'Sufi Soul Masterpiece',
+  },
+  {
+    id: 'mesce-track-14',
+    title: 'Neela Nilave (From "RDX")',
+    artist: 'Jakes Bejoy & Kapil Kapilan',
+    album: 'RDX',
+    cover: 'https://c.saavncdn.com/411/RDX-Malayalam-2023-20250130073151-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/411/b1fe94ac64a44fa8c0102f8ad25cdf17_320.mp4',
+    youtubeId: 'B3eam3427u8',
+    duration: 253, // Full 4 mins 13 secs
+    genre: 'Campus Love Anthem',
+  },
+  {
+    id: 'mesce-track-15',
+    title: 'Kannmani Anbodu (From "Gunaa")',
+    artist: 'Ilaiyaraaja, Kamal Haasan & S. Janaki',
+    album: 'Gunaa',
+    cover: 'https://c.saavncdn.com/939/Gunaa-Tamil-2017-20170901171412-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/939/ca3f3992e6a7d1e1bee0934d59fe05dd_320.mp4',
+    youtubeId: 'qY8k2G4c9vA',
+    duration: 327, // Full 5 mins 27 secs
+    genre: 'Timeless Classical Melody',
+  },
+  {
+    id: 'mesce-track-16',
+    title: 'Jaada (From "Aavesham")',
+    artist: 'Sushin Shyam',
+    album: 'Aavesham (Original Motion Picture Soundtrack)',
+    cover: 'https://c.saavncdn.com/202/Aavesham-Original-Motion-Picture-Soundtrack-Malayalam-2024-20250910150630-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/202/b488cef5bfd15a995dcc4fcc455b71ec_320.mp4',
+    youtubeId: 'Y9_bF0xL3z4',
+    duration: 162, // Full 2 mins 42 secs
+    genre: 'Groovy Campus Vibe',
+  },
+  {
+    id: 'mesce-track-17',
+    title: 'Armadham (From "Aavesham")',
+    artist: 'Sushin Shyam & Pranavam Sasi',
+    album: 'Aavesham (Original Motion Picture Soundtrack)',
+    cover: 'https://c.saavncdn.com/202/Aavesham-Original-Motion-Picture-Soundtrack-Malayalam-2024-20250910150630-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/202/2e8ce109866b92c79404e8f8961fd149_320.mp4',
+    youtubeId: 'X4w5eQ10q7I',
+    duration: 173, // Full 2 mins 53 secs
+    genre: 'Festival Dance Beat',
+  },
+  {
+    id: 'mesce-track-18',
+    title: 'Chekele',
+    artist: 'Avial',
+    album: 'Avial',
+    cover: 'https://c.saavncdn.com/792/Avial-Malayalam-2008-20260224032408-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/792/5b37ea86f7062d5af4548759b871f2b2_320.mp4',
+    youtubeId: 'eCgQ3jY2YFk',
+    duration: 301, // Full 5 mins 1 sec
+    genre: 'Malayalam Alternative Rock',
+  },
+  {
+    id: 'mesce-track-19',
+    title: 'Navarasam',
+    artist: 'Thaikkudam Bridge',
+    album: 'Navarasam',
+    cover: 'https://c.saavncdn.com/024/Navarasam-Malayalam-2024-20251113113624-500x500.jpg',
+    streamUrl: 'https://aac.saavncdn.com/024/4cdba61a6d1404a1c623bf316c7a8a20_320.mp4',
+    youtubeId: '2Vv-BfVoq4g',
+    duration: 394, // Full 6 mins 34 secs
+    genre: 'Kathakali Rock Fusion',
   },
 ]
 
+function decodeHtml(html) {
+  if (!html) return ''
+  return html
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+}
+
 /**
- * Searches for songs using iTunes metadata API + maps to full YouTube track.
+ * Decrypts JioSaavn's encrypted_media_url into direct 320kbps full-length AAC stream URL.
  */
-export async function searchSongs(query, limit = 5) {
-  if (!query || !query.trim()) return []
-
+export function decryptSaavnMediaUrl(encryptedUrl) {
+  if (!encryptedUrl) return null
   try {
-    const encoded = encodeURIComponent(query.trim())
-    const url = `https://itunes.apple.com/search?term=${encoded}&entity=song&limit=${limit}`
-    const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error(`Search API returned status ${response.status}`)
-    }
-    const data = await response.json()
-    if (!data.results || data.results.length === 0) {
-      return []
-    }
-
-    return data.results.map((item) => {
-      let highResCover = item.artworkUrl100
-      if (highResCover) {
-        highResCover = highResCover.replace(/100x100(?:bb)?\.(jpg|png|jpeg)/i, '600x600bb.$1')
+    const key = CryptoJS.enc.Utf8.parse('38346591')
+    const decrypted = CryptoJS.DES.decrypt(
+      {
+        ciphertext: CryptoJS.enc.Base64.parse(encryptedUrl),
+      },
+      key,
+      {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7,
       }
-
-      // Check if we have an explicit YouTube video ID match in our dictionary
-      const lowerTitle = item.trackName.toLowerCase()
-      let mappedYt = null
-      for (const [k, v] of Object.entries(POPULAR_MALAYALAM_YOUTUBE_MAP)) {
-        if (lowerTitle.includes(k)) {
-          mappedYt = v
-          break
-        }
-      }
-
-      // Real full duration from trackTimeMillis (e.g. 210,000ms -> 210 seconds!)
-      const fullDuration = item.trackTimeMillis
-        ? Math.round(item.trackTimeMillis / 1000)
-        : mappedYt?.duration || 210
-
-      return {
-        id: `track-${item.trackId}`,
-        title: item.trackName,
-        artist: item.artistName,
-        album: item.collectionName || 'Single',
-        cover: highResCover || item.artworkUrl100 || DEFAULT_ALBUM_COVER,
-        streamUrl: item.previewUrl,
-        youtubeId: mappedYt ? mappedYt.id : null,
-        searchQuery: `${item.trackName} ${item.artistName}`,
-        duration: fullDuration,
-        genre: item.primaryGenreName || 'Campus Music',
-      }
-    })
-  } catch (error) {
-    console.warn('Music search error:', error)
-    return []
+    )
+    const url = decrypted.toString(CryptoJS.enc.Utf8)
+    if (!url) return null
+    // Prefer highest-quality 320kbps MP4 stream
+    return url.replace(/_96\.mp4$/, '_320.mp4')
+  } catch (e) {
+    console.warn('Saavn URL decrypt note:', e)
+    return null
   }
 }
 
 /**
- * Resolves the best matching playable track for a given song title and artist.
+ * Searches for songs with full-length 320kbps streams.
+ * Automatically tries local library, JioSaavn engine, and iTunes fallback.
+ */
+export async function searchSongs(query, limit = 5) {
+  if (!query || !query.trim()) return []
+
+  const trimmed = query.trim()
+  const lower = trimmed.toLowerCase()
+
+  // 1. First, check if there's an exact or close match in our curated full-length library
+  const directMatches = DEFAULT_MALAYALAM_PLAYLIST.filter(
+    (t) =>
+      t.title.toLowerCase().includes(lower) ||
+      t.artist.toLowerCase().includes(lower) ||
+      lower.includes(t.title.toLowerCase().split('(')[0].trim())
+  )
+
+  // 2. Query full-length music engine via Vite proxy or direct endpoint
+  try {
+    const encoded = encodeURIComponent(trimmed)
+    const apiUrl = `/api/saavn/api.php?__call=search.getResults&_format=json&_marker=0&cc=in&includeMetaTags=1&q=${encoded}`
+    const response = await fetch(apiUrl)
+
+    if (response.ok) {
+      const data = await response.json()
+      const results = data.results || []
+
+      if (results.length > 0) {
+        const parsed = results.slice(0, limit).map((item) => {
+          const fullStream = decryptSaavnMediaUrl(item.encrypted_media_url)
+          let coverUrl = item.image || ''
+          if (coverUrl) {
+            coverUrl = coverUrl.replace(/150x150/, '500x500')
+          }
+
+          const rawTitle = decodeHtml(item.song || item.title || trimmed)
+          const rawArtist = decodeHtml(item.singers || item.music || item.more_info?.primary_artists || 'Popular Artist')
+          const rawAlbum = decodeHtml(item.album || 'Single')
+          const sec = parseInt(item.duration, 10) || 210
+
+          return {
+            id: `saavn-${item.id}`,
+            title: rawTitle,
+            artist: rawArtist,
+            album: rawAlbum,
+            cover: coverUrl || DEFAULT_ALBUM_COVER,
+            streamUrl: fullStream,
+            duration: sec,
+            genre: item.language ? `${item.language} / Campus Hit` : 'Campus Music',
+            searchQuery: `${rawTitle} ${rawArtist}`,
+          }
+        })
+
+        // Filter out results where stream couldn't be decrypted
+        const valid = parsed.filter((p) => Boolean(p.streamUrl))
+        if (valid.length > 0) {
+          return valid
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Saavn search note, falling back to local/iTunes:', err)
+  }
+
+  // 3. Fallback: if we have curated library matches, return them!
+  if (directMatches.length > 0) {
+    return directMatches.slice(0, limit)
+  }
+
+  // 4. Fallback to iTunes metadata with full-song resolver
+  try {
+    const encoded = encodeURIComponent(trimmed)
+    const itunesUrl = `https://itunes.apple.com/search?term=${encoded}&entity=song&limit=${limit}`
+    const response = await fetch(itunesUrl)
+    if (response.ok) {
+      const data = await response.json()
+      if (data.results && data.results.length > 0) {
+        return data.results.map((item) => {
+          let highResCover = item.artworkUrl100
+          if (highResCover) {
+            highResCover = highResCover.replace(/100x100(?:bb)?\.(jpg|png|jpeg)/i, '600x600bb.$1')
+          }
+
+          const fullDuration = item.trackTimeMillis
+            ? Math.round(item.trackTimeMillis / 1000)
+            : 210
+
+          // Check if we have a full stream in our curated list for this title
+          const itemLower = item.trackName.toLowerCase()
+          const matchedCurated = DEFAULT_MALAYALAM_PLAYLIST.find((p) =>
+            itemLower.includes(p.title.toLowerCase().split('(')[0].trim())
+          )
+
+          return {
+            id: `track-${item.trackId}`,
+            title: item.trackName,
+            artist: item.artistName,
+            album: item.collectionName || 'Single',
+            cover: highResCover || item.artworkUrl100 || DEFAULT_ALBUM_COVER,
+            streamUrl: matchedCurated ? matchedCurated.streamUrl : null,
+            duration: matchedCurated ? matchedCurated.duration : fullDuration,
+            genre: item.primaryGenreName || 'Campus Music',
+            searchQuery: `${item.trackName} ${item.artistName}`,
+          }
+        })
+      }
+    }
+  } catch (error) {
+    console.warn('iTunes search error:', error)
+  }
+
+  return DEFAULT_MALAYALAM_PLAYLIST.slice(0, limit)
+}
+
+/**
+ * Resolves the best matching playable full-length track for a given song title and artist.
  */
 export async function fetchBestMatch(songTitle, artist = '') {
+  if (!songTitle) {
+    return DEFAULT_MALAYALAM_PLAYLIST[0]
+  }
+
   const query = artist ? `${songTitle} ${artist}` : songTitle
-  const results = await searchSongs(query, 3)
 
-  if (results.length > 0) {
-    return results[0]
-  }
-
-  // Fallback 1: Try searching just song title without artist
-  if (artist) {
-    const titleOnlyResults = await searchSongs(songTitle, 3)
-    if (titleOnlyResults.length > 0) {
-      return titleOnlyResults[0]
-    }
-  }
-
-  // Fallback 2: Check internal default playlist for a match
-  const lowerTitle = songTitle.toLowerCase()
+  // 1. Check curated list first for instant resolution
+  const lowerTitle = songTitle.toLowerCase().trim()
   const localMatch = DEFAULT_MALAYALAM_PLAYLIST.find(
     (t) =>
       t.title.toLowerCase().includes(lowerTitle) ||
-      lowerTitle.includes(t.title.toLowerCase()) ||
-      t.artist.toLowerCase().includes(lowerTitle)
+      lowerTitle.includes(t.title.toLowerCase().split('(')[0].trim()) ||
+      (artist && t.artist.toLowerCase().includes(artist.toLowerCase()))
   )
 
   if (localMatch) {
     return localMatch
   }
 
-  // Check known YouTube map
-  for (const [k, v] of Object.entries(POPULAR_MALAYALAM_YOUTUBE_MAP)) {
-    if (lowerTitle.includes(k)) {
-      return {
-        id: `yt-${v.id}`,
-        title: songTitle,
-        artist: artist || 'Campus Music',
-        album: 'MESCE FM Airplay',
-        cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
-        youtubeId: v.id,
-        duration: v.duration,
-      }
+  // 2. Search full-length engine
+  const results = await searchSongs(query, 3)
+  if (results.length > 0 && results[0].streamUrl) {
+    return results[0]
+  }
+
+  // Fallback 1: Try searching just song title without artist
+  if (artist) {
+    const titleOnlyResults = await searchSongs(songTitle, 3)
+    if (titleOnlyResults.length > 0 && titleOnlyResults[0].streamUrl) {
+      return titleOnlyResults[0]
     }
   }
 
-  // Fallback 3: Return a random popular track from the default list
-  const randomDefault = DEFAULT_MALAYALAM_PLAYLIST[Math.floor(Math.random() * DEFAULT_MALAYALAM_PLAYLIST.length)]
+  // Fallback 2: Return random default track
+  const randomDefault =
+    DEFAULT_MALAYALAM_PLAYLIST[Math.floor(Math.random() * DEFAULT_MALAYALAM_PLAYLIST.length)]
   return {
     ...randomDefault,
     id: `custom-${Date.now()}`,

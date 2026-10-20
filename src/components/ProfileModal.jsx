@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export function ProfileModal({ isOpen, onClose, onOpenAdminLogin }) {
+export function ProfileModal({ isOpen, onClose }) {
   const [hdAudio, setHdAudio] = useState(true)
   const [cellularData, setCellularData] = useState(true)
   const [offlineSync, setOfflineSync] = useState(false)
@@ -29,7 +29,8 @@ export function ProfileModal({ isOpen, onClose, onOpenAdminLogin }) {
               className="w-13 h-13 rounded-full object-cover border-2 border-[#ff7a00] shadow-md"
               onError={(e) => {
                 e.currentTarget.onerror = null
-                e.currentTarget.src = 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80'
+                e.currentTarget.src =
+                  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80'
               }}
             />
             <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#00d26a] ring-2 ring-[#242426]"></span>
@@ -103,19 +104,8 @@ export function ProfileModal({ isOpen, onClose, onOpenAdminLogin }) {
           </div>
         </div>
 
-        {/* Discrete Station Staff / Faculty Link */}
-        <div className="pt-2 border-t border-white/5 flex flex-col gap-2">
-          <button
-            onClick={() => {
-              onClose()
-              if (onOpenAdminLogin) onOpenAdminLogin()
-            }}
-            className="flex items-center justify-center gap-1.5 text-[11px] font-bold text-white/60 hover:text-[#ff7a00] transition-colors py-1 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[16px]">lock</span>
-            <span>Studio Staff & RJ Portal Login</span>
-          </button>
-
+        {/* Modal Action */}
+        <div className="pt-2 border-t border-white/5">
           <button
             onClick={onClose}
             className="w-full py-2.5 bg-[#242426] hover:bg-[#2c2c2e] text-white font-bold text-xs rounded-2xl border border-white/5 transition-colors cursor-pointer"
