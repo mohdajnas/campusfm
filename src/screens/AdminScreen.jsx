@@ -19,6 +19,9 @@ export function AdminScreen({
   onRejectEvent,
   lostAndFound,
   onUpdateLostAndFound,
+  opportunities = [],
+  onAddOpportunity,
+  onDeleteOpportunity,
   auditions,
   onUpdateAuditions,
   musicSubmissions,
@@ -52,6 +55,15 @@ export function AdminScreen({
   const [evDate, setEvDate] = useState('')
   const [evVenue, setEvVenue] = useState('')
   const [evDesc, setEvDesc] = useState('')
+
+  // Opportunity / Internship form state
+  const [oppTitle, setOppTitle] = useState('')
+  const [oppOrg, setOppOrg] = useState('')
+  const [oppStipend, setOppStipend] = useState('')
+  const [oppDeadline, setOppDeadline] = useState('')
+  const [oppTags, setOppTags] = useState('Remote, Certificate, Paid')
+  const [oppLink, setOppLink] = useState('')
+  const [oppSuccessMsg, setOppSuccessMsg] = useState('')
 
   // Live Microphone / Speaking provision
   const [isMicLive, setIsMicLive] = useState(false)
@@ -281,6 +293,40 @@ export function AdminScreen({
     setEvVenue('')
     setEvDesc('')
     alert('New campus event published successfully!')
+  }
+
+  // Add Opportunity / Internship handler
+  const handleCreateOpportunity = (e) => {
+    e.preventDefault()
+    if (!oppTitle.trim() || !oppOrg.trim()) return
+
+    const parsedTags = oppTags
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean)
+
+    if (onAddOpportunity) {
+      onAddOpportunity({
+        id: `opp-${Date.now()}`,
+        title: oppTitle.trim(),
+        org: oppOrg.trim(),
+        stipend: oppStipend.trim() || '₹12,000 / month',
+        deadline: oppDeadline.trim() || 'Rolling Basis',
+        tags: parsedTags.length > 0 ? parsedTags : ['Internship', 'Certificate'],
+        link: oppLink.trim() || 'Apply via IEDC Portal',
+      })
+    }
+
+    confetti({ particleCount: 35, spread: 60 })
+    setOppSuccessMsg('Internship successfully published to Campus Wire!')
+    setTimeout(() => setOppSuccessMsg(''), 4000)
+
+    setOppTitle('')
+    setOppOrg('')
+    setOppStipend('')
+    setOppDeadline('')
+    setOppTags('Remote, Certificate, Paid')
+    setOppLink('')
   }
 
   // Event approval/rejection handlers
@@ -1266,6 +1312,194 @@ export function AdminScreen({
               Broadcast on Campus Wire & Radio
             </button>
           </form>
+
+          {/* SECTION: Internship & Student Opportunities Management */}
+          <div className="bg-[#1c1c1e] p-4.5 rounded-[28px] border border-white/[0.08] shadow-lg flex flex-col gap-3.5">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
+              <div>
+                <h3 className="text-[14px] font-black text-white flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[#ff7a00] text-[20px]">
+                    work
+                  </span>
+                  Internships & Student Opportunities
+                </h3>
+                <p className="text-[10px] text-white/50">
+                  Publish verified internships, hackathons & hiring drives to Campus Wire
+                </p>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-[#242426] text-[#00d26a] border border-white/10 text-[10px] font-extrabold">
+                {opportunities.length} Active
+              </span>
+            </div>
+
+            {/* Success alert message */}
+            {oppSuccessMsg && (
+              <div className="bg-[#00d26a]/15 border border-[#00d26a]/30 text-[#00d26a] text-[11px] font-bold p-2.5 rounded-xl flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                <span>{oppSuccessMsg}</span>
+              </div>
+            )}
+
+            {/* Form to Publish New Internship */}
+            <form onSubmit={handleCreateOpportunity} className="bg-[#242426] p-3.5 rounded-2xl border border-white/10 flex flex-col gap-2.5">
+              <span className="text-[11px] uppercase tracking-wider text-white/70 font-extrabold flex items-center gap-1">
+                <span className="material-symbols-outlined text-[14px] text-[#ff7a00]">add_box</span>
+                Add New Internship / Opportunity
+              </span>
+
+              <div>
+                <label className="text-[10px] font-bold text-white/60 block mb-1">
+                  Internship Role / Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. AI / ML Engineering Intern or Flutter UI Developer"
+                  value={oppTitle}
+                  onChange={(e) => setOppTitle(e.target.value)}
+                  className="w-full bg-[#1c1c1e] border border-white/10 rounded-xl px-3 py-2 text-[12px] font-bold text-white outline-none focus:border-[#ff7a00]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[10px] font-bold text-white/60 block mb-1">
+                    Company / Organization *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Startup Village / IEDC / TCS"
+                    value={oppOrg}
+                    onChange={(e) => setOppOrg(e.target.value)}
+                    className="w-full bg-[#1c1c1e] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-white/60 block mb-1">
+                    Stipend / Prize
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. ₹15,000 / mo or Certificate"
+                    value={oppStipend}
+                    onChange={(e) => setOppStipend(e.target.value)}
+                    className="w-full bg-[#1c1c1e] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[10px] font-bold text-white/60 block mb-1">
+                    Application Deadline
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Nov 25, 2026"
+                    value={oppDeadline}
+                    onChange={(e) => setOppDeadline(e.target.value)}
+                    className="w-full bg-[#1c1c1e] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-bold text-white/60 block mb-1">
+                    Tags (Comma-separated)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Remote, Paid, Certificate"
+                    value={oppTags}
+                    onChange={(e) => setOppTags(e.target.value)}
+                    className="w-full bg-[#1c1c1e] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-white/60 block mb-1">
+                  Application Link / Instructions
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Apply via IEDC Portal or https://startup.io/careers"
+                  value={oppLink}
+                  onChange={(e) => setOppLink(e.target.value)}
+                  className="w-full bg-[#1c1c1e] border border-white/10 rounded-xl px-3 py-2 text-[12px] text-white outline-none focus:border-[#ff7a00]"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="mt-1 py-2.5 px-4 bg-[#ff7a00] hover:bg-[#ff8c1a] text-white font-black text-[12px] rounded-xl shadow-md cursor-pointer transition-all active:scale-98 flex items-center justify-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-[16px]">send</span>
+                <span>Publish Internship to Campus Wire</span>
+              </button>
+            </form>
+
+            {/* List of Published Opportunities with Delete Option */}
+            <div className="flex flex-col gap-2 pt-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+                Active Openings on Campus Wire ({opportunities.length})
+              </span>
+
+              {opportunities.length === 0 ? (
+                <div className="p-3 text-center bg-[#242426] rounded-xl text-white/50 text-[11px]">
+                  No opportunities published yet. Add one above!
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
+                  {opportunities.map((opp) => (
+                    <div
+                      key={opp.id}
+                      className="p-3 rounded-xl bg-[#242426] border border-white/10 flex items-start justify-between gap-2"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-[12px] font-black text-white truncate">{opp.title}</h4>
+                          <span className="text-[9px] font-black text-[#00d26a] bg-[#00d26a]/10 px-1.5 py-0.5 rounded shrink-0">
+                            {opp.stipend}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-[#ff7a00] font-bold mt-0.5">{opp.org}</p>
+                        <div className="flex items-center gap-2 text-[9.5px] text-white/50 mt-1">
+                          <span>Deadline: {opp.deadline}</span>
+                          <span>•</span>
+                          <span className="truncate">{opp.link}</span>
+                        </div>
+                        {opp.tags && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {opp.tags.map((tag, tIdx) => (
+                              <span
+                                key={tIdx}
+                                className="text-[8.5px] px-1.5 py-0.2 rounded bg-white/5 text-white/60 font-semibold"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {onDeleteOpportunity && (
+                        <button
+                          type="button"
+                          onClick={() => onDeleteOpportunity(opp.id)}
+                          title="Remove opportunity from Campus Wire"
+                          className="p-1.5 text-white/40 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">delete</span>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Manage Lost & Found items */}
           <div className="bg-[#1c1c1e] p-4.5 rounded-[28px] border border-white/[0.08] shadow-lg flex flex-col gap-2.5">

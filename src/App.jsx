@@ -43,6 +43,9 @@ import {
   updateAuditionStatusInDb,
   subscribeMusicSubmissions,
   submitMusicToDb,
+  subscribeOpportunities,
+  addOpportunityToDb,
+  deleteOpportunityFromDb,
 } from './firebase/db'
 import { audioEngine } from './services/audioEngine'
 import { liveBroadcastService } from './services/liveBroadcastService'
@@ -95,7 +98,7 @@ export default function App() {
   // Campus Wire state
   const [events, setEvents] = useState(CAMPUS_EVENTS)
   const [lostAndFound, setLostAndFound] = useState(LOST_AND_FOUND)
-  const [opportunities] = useState(OPPORTUNITIES)
+  const [opportunities, setOpportunities] = useState(OPPORTUNITIES)
 
   // Discover state
   const [spotlight] = useState(STUDENT_SPOTLIGHT)
@@ -186,6 +189,9 @@ export default function App() {
     const unsubMusic = subscribeMusicSubmissions((mus) => {
       if (mus && mus.length > 0) setMusicSubmissions(mus)
     })
+    const unsubOpp = subscribeOpportunities((opps) => {
+      if (opps && opps.length > 0) setOpportunities(opps)
+    })
 
     return () => {
       unsubRadio && unsubRadio()
@@ -197,6 +203,7 @@ export default function App() {
       unsubLF && unsubLF()
       unsubAud && unsubAud()
       unsubMusic && unsubMusic()
+      unsubOpp && unsubOpp()
     }
   }, [])
 
@@ -525,6 +532,29 @@ export default function App() {
     setAuditions(updatedList)
   }
 
+  // Opportunities / Internships Handlers
+  const handleAddOpportunity = async (opportunity) => {
+    const oppWithId = {
+      ...opportunity,
+      id: opportunity.id || `opp-${Date.now()}`,
+    }
+    setOpportunities((prev) => [oppWithId, ...prev])
+    try {
+      await addOpportunityToDb(oppWithId)
+    } catch {
+      // Local fallback
+    }
+  }
+
+  const handleDeleteOpportunity = async (id) => {
+    setOpportunities((prev) => prev.filter((opp) => opp.id !== id))
+    try {
+      await deleteOpportunityFromDb(id)
+    } catch {
+      // Local fallback
+    }
+  }
+
   // Admin Broadcast State Update
   const handleUpdateRadioState = async (newState) => {
     setRadioState(newState)
@@ -691,6 +721,9 @@ export default function App() {
               onRejectEvent={handleRejectEvent}
               lostAndFound={lostAndFound}
               onUpdateLostAndFound={handleUpdateLostAndFound}
+              opportunities={opportunities}
+              onAddOpportunity={handleAddOpportunity}
+              onDeleteOpportunity={handleDeleteOpportunity}
               auditions={auditions}
               onUpdateAuditions={handleUpdateAuditions}
               musicSubmissions={musicSubmissions}

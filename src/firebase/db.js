@@ -441,6 +441,51 @@ export async function submitMusicToDb(music) {
   }
 }
 
+// 10. Internships & Student Opportunities
+export function subscribeOpportunities(callback) {
+  try {
+    const colRef = collection(db, 'opportunities')
+    return onSnapshot(
+      colRef,
+      (snapshot) => {
+        if (!snapshot.empty) {
+          const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+          callback(list)
+        }
+      },
+      (err) => {
+        console.warn('Firestore opportunities sync notice:', err.message)
+      }
+    )
+  } catch (err) {
+    console.warn('subscribeOpportunities error:', err)
+    return () => {}
+  }
+}
+
+export async function addOpportunityToDb(opp) {
+  try {
+    const colRef = collection(db, 'opportunities')
+    await addDoc(colRef, {
+      ...opp,
+      createdAt: serverTimestamp(),
+    })
+  } catch (err) {
+    console.error('Failed to add opportunity:', err)
+    throw err
+  }
+}
+
+export async function deleteOpportunityFromDb(id) {
+  try {
+    const docRef = doc(db, 'opportunities', id)
+    await deleteDoc(docRef)
+  } catch (err) {
+    console.error('Failed to delete opportunity:', err)
+    throw err
+  }
+}
+
 // Seeder Utility: Seeds complete campus radio data into Firestore
 export async function seedCampusDataToFirestore() {
   console.log('Seeding campus data to Firestore...')
@@ -497,6 +542,14 @@ export async function seedCampusDataToFirestore() {
     for (const aud of AUDITION_APPLICATIONS) {
       await setDoc(doc(db, 'auditions', aud.id), {
         ...aud,
+        createdAt: serverTimestamp(),
+      })
+    }
+
+    // 9. Opportunities & Internships
+    for (const opp of OPPORTUNITIES) {
+      await setDoc(doc(db, 'opportunities', opp.id), {
+        ...opp,
         createdAt: serverTimestamp(),
       })
     }
