@@ -269,6 +269,7 @@ export default function App() {
 
   // Audio Playback Handlers
   const handleTogglePlay = () => {
+    liveBroadcastService.unlockAudio()
     audioEngine.togglePlay()
   }
 
@@ -607,7 +608,10 @@ export default function App() {
           aria-label="Live Voice Broadcast Alert"
           className="fixed top-14 left-0 right-0 z-40 px-4 max-w-md mx-auto pointer-events-none"
         >
-          <div className="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white p-3 rounded-2xl shadow-2xl flex items-center justify-between gap-2.5 border border-white/20 pointer-events-auto">
+          <div
+            onClick={() => liveBroadcastService.unlockAudio()}
+            className="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white p-3 rounded-2xl shadow-2xl flex items-center justify-between gap-2.5 border border-white/20 pointer-events-auto cursor-pointer transition-transform active:scale-98"
+          >
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-xl bg-black/30 flex items-center justify-center shrink-0 animate-pulse">
                 <span className="material-symbols-outlined text-[19px] text-white">mic</span>
@@ -625,10 +629,24 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex items-center gap-1 shrink-0 bg-black/40 px-2.5 py-1 rounded-xl">
-              <span className="w-1 h-3.5 bg-white rounded-full animate-bounce"></span>
-              <span className="w-1 h-5 bg-white rounded-full animate-bounce [animation-delay:150ms]"></span>
-              <span className="w-1 h-2.5 bg-white rounded-full animate-bounce [animation-delay:300ms]"></span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  liveBroadcastService.unlockAudio()
+                  if (!isPlaying) handleTogglePlay()
+                }}
+                className="bg-black/40 hover:bg-black/60 text-white text-[10px] font-black px-2.5 py-1 rounded-xl flex items-center gap-1 border border-white/10"
+              >
+                <span className="material-symbols-outlined text-[14px]">volume_up</span>
+                <span>Listen</span>
+              </button>
+              <div className="flex items-center gap-1 bg-black/40 px-2 py-1 rounded-xl">
+                <span className="w-1 h-3.5 bg-white rounded-full animate-bounce"></span>
+                <span className="w-1 h-5 bg-white rounded-full animate-bounce [animation-delay:150ms]"></span>
+                <span className="w-1 h-2.5 bg-white rounded-full animate-bounce [animation-delay:300ms]"></span>
+              </div>
             </div>
           </div>
         </aside>
